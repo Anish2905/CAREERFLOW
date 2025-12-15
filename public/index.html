@@ -1286,18 +1286,21 @@
                         <textarea id="notes" name="notes"
                             placeholder="Interview details, contacts, follow-ups..."></textarea>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="resumeId">Resume Used <span id="resumeCount"
-                                    style="font-weight:400;color:var(--color-text-tertiary);"></span></label>
-                            <select id="resumeId" name="resumeId">
-                                <option value="">-- Select Resume --</option>
-                            </select>
+                    <div class="form-group">
+                        <label>Resume</label>
+                        <div id="resumeLinked"
+                            style="display:none; padding: var(--space-3); background: var(--color-primary-light); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
+                            <span>📄 <span id="linkedResumeName"></span></span>
+                            <button type="button" onclick="unlinkResume()" class="btn btn-icon" style="font-size: 14px;"
+                                title="Remove resume">✕</button>
                         </div>
-                        <div class="form-group">
-                            <label>Upload New Resume</label>
+                        <div id="resumeUploadSection">
+                            <select id="resumeId" name="resumeId" style="margin-bottom: var(--space-2);">
+                                <option value="">-- Select existing resume --</option>
+                            </select>
                             <input type="file" id="resumeUpload" accept=".pdf,.doc,.docx"
                                 style="font-size: var(--font-size-sm);">
+                            <input type="hidden" id="resumeIdHidden" name="resumeId">
                         </div>
                     </div>
                 </div>
@@ -1967,9 +1970,41 @@
             document.getElementById('appliedDate').value = app.appliedDate || '';
             document.getElementById('url').value = app.url || '';
             document.getElementById('notes').value = app.notes || '';
-            await populateResumeDropdown(app.resumeId || '');
+
+            // Handle resume display
+            await showResumeSection(app.resumeId);
             openModal(true);
         }
+
+        // Show/hide resume sections based on linked state
+        async function showResumeSection(resumeId) {
+            const linkedSection = document.getElementById('resumeLinked');
+            const uploadSection = document.getElementById('resumeUploadSection');
+            const linkedName = document.getElementById('linkedResumeName');
+            const hiddenInput = document.getElementById('resumeIdHidden');
+
+            if (resumeId) {
+                const resume = await getResumeById(resumeId);
+                if (resume) {
+                    linkedName.textContent = resume.fileName || resume.name;
+                    linkedSection.style.display = 'flex';
+                    uploadSection.style.display = 'none';
+                    hiddenInput.value = resumeId;
+                    return;
+                }
+            }
+            // No resume linked - show upload
+            linkedSection.style.display = 'none';
+            uploadSection.style.display = 'block';
+            hiddenInput.value = '';
+            await populateResumeDropdown();
+        }
+
+        function unlinkResume() {
+            document.getElementById('resumeIdHidden').value = '';
+            showResumeSection(null);
+        }
+        window.unlinkResume = unlinkResume;
 
         function showToast(msg, showUndo = false, isError = false) { clearTimeout(toastTimeout); toastMessage.textContent = msg; toastUndo.style.display = showUndo ? 'inline-block' : 'none'; toast.classList.toggle('error', isError); toast.classList.add('visible'); toastTimeout = setTimeout(hideToast, showUndo ? 5000 : 2500); }
         function hideToast() { toast.classList.remove('visible'); if (!toastUndo.style.display || toastUndo.style.display === 'none') deletedApp = null; }
@@ -2188,7 +2223,9 @@
         // Populate resume dropdown on modal open
         const originalOpenModal = openModal;
         openModal = async function (isEdit = false) {
-            await populateResumeDropdown();
+            if (!isEdit) {
+                await showResumeSection(null); // New app - show upload section
+            }
             originalOpenModal(isEdit);
         };
 
