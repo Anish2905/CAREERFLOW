@@ -1915,7 +1915,7 @@
 
         // Local-first CRUD functions
         async function addApplication(data) {
-            const app = { id: generateId(), company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, resumeId: data.resumeId || null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+            const app = { id: generateId(), company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, resumeUrl: data.resumeUrl?.trim() || null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
             await saveLocal(app);
             addPendingChange(app.id);
             applications.unshift(app);
@@ -1931,7 +1931,7 @@
             const existing = await getLocalById(id);
             if (!existing) return;
             const statusChangedToInterview = existing.status !== 'interview' && data.status === 'interview';
-            const updated = { ...existing, company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, resumeId: data.resumeId || null, updatedAt: new Date().toISOString() };
+            const updated = { ...existing, company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, resumeUrl: data.resumeUrl?.trim() || null, updatedAt: new Date().toISOString() };
             await saveLocal(updated);
             addPendingChange(id);
             const idx = applications.findIndex(a => a.id === id);
