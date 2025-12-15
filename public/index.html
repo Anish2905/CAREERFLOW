@@ -1288,20 +1288,28 @@
                     </div>
                     <div class="form-group">
                         <label>Resume</label>
+                        <!-- Linked resume display (hidden by default) -->
                         <div id="resumeLinked"
-                            style="display:none; padding: var(--space-3); background: var(--color-primary-light); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: space-between;">
-                            <span>📄 <span id="linkedResumeName"></span></span>
-                            <button type="button" onclick="unlinkResume()" class="btn btn-icon" style="font-size: 14px;"
-                                title="Remove resume">✕</button>
+                            style="display: none; padding: var(--space-3); background: var(--color-primary-light); border-radius: var(--radius-sm); align-items: center; justify-content: space-between; gap: var(--space-3);">
+                            <span style="display: flex; align-items: center; gap: var(--space-2);">📄 <span
+                                    id="linkedResumeName" style="font-weight: 500;"></span></span>
+                            <span style="display: flex; gap: var(--space-2);">
+                                <button type="button" onclick="viewLinkedResume()" class="btn btn-icon"
+                                    style="font-size: 12px; padding: 4px 8px;" title="View resume">👁️ View</button>
+                                <button type="button" onclick="unlinkResume()" class="btn btn-icon"
+                                    style="font-size: 12px; padding: 4px 8px;" title="Remove">✕</button>
+                            </span>
                         </div>
+                        <!-- Upload section (visible by default) -->
                         <div id="resumeUploadSection">
-                            <select id="resumeId" name="resumeId" style="margin-bottom: var(--space-2);">
-                                <option value="">-- Select existing resume --</option>
-                            </select>
                             <input type="file" id="resumeUpload" accept=".pdf,.doc,.docx"
                                 style="font-size: var(--font-size-sm);">
-                            <input type="hidden" id="resumeIdHidden" name="resumeId">
+                            <small
+                                style="display: block; margin-top: var(--space-1); color: var(--color-text-tertiary);">PDF,
+                                DOC, or DOCX</small>
                         </div>
+                        <!-- Hidden field for form submission -->
+                        <input type="hidden" id="resumeIdField" name="resumeId" value="">
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1971,40 +1979,10 @@
             document.getElementById('url').value = app.url || '';
             document.getElementById('notes').value = app.notes || '';
 
-            // Handle resume display
-            await showResumeSection(app.resumeId);
+            // Handle resume display (showResumeUI defined later)
+            await showResumeUI(app.resumeId);
             openModal(true);
         }
-
-        // Show/hide resume sections based on linked state
-        async function showResumeSection(resumeId) {
-            const linkedSection = document.getElementById('resumeLinked');
-            const uploadSection = document.getElementById('resumeUploadSection');
-            const linkedName = document.getElementById('linkedResumeName');
-            const hiddenInput = document.getElementById('resumeIdHidden');
-
-            if (resumeId) {
-                const resume = await getResumeById(resumeId);
-                if (resume) {
-                    linkedName.textContent = resume.fileName || resume.name;
-                    linkedSection.style.display = 'flex';
-                    uploadSection.style.display = 'none';
-                    hiddenInput.value = resumeId;
-                    return;
-                }
-            }
-            // No resume linked - show upload
-            linkedSection.style.display = 'none';
-            uploadSection.style.display = 'block';
-            hiddenInput.value = '';
-            await populateResumeDropdown();
-        }
-
-        function unlinkResume() {
-            document.getElementById('resumeIdHidden').value = '';
-            showResumeSection(null);
-        }
-        window.unlinkResume = unlinkResume;
 
         function showToast(msg, showUndo = false, isError = false) { clearTimeout(toastTimeout); toastMessage.textContent = msg; toastUndo.style.display = showUndo ? 'inline-block' : 'none'; toast.classList.toggle('error', isError); toast.classList.add('visible'); toastTimeout = setTimeout(hideToast, showUndo ? 5000 : 2500); }
         function hideToast() { toast.classList.remove('visible'); if (!toastUndo.style.display || toastUndo.style.display === 'none') deletedApp = null; }
@@ -2087,9 +2065,15 @@
             isPulling = false;
         });
 
-        // ===== Resume Upload Handling =====
+        // ===== Resume Handling (Simplified) =====
         const resumeUpload = document.getElementById('resumeUpload');
-        const resumeIdSelect = document.getElementById('resumeId');
+        const resumeLinked = document.getElementById('resumeLinked');
+        const resumeUploadSection = document.getElementById('resumeUploadSection');
+        const linkedResumeName = document.getElementById('linkedResumeName');
+        const resumeIdField = document.getElementById('resumeIdField');
+
+        // Track current resume for viewing
+        let currentLinkedResumeId = null;
 
         // Sync resumes from cloud on load
         async function syncResumesFromCloud() {
@@ -2102,7 +2086,7 @@
                 if (res.ok) {
                     const { resumes } = await res.json();
                     for (const r of resumes) {
-                        await saveResume(r); // Save to local IndexedDB
+                        await saveResume(r);
                     }
                 }
             } catch (e) { console.error('Resume sync failed:', e); }
@@ -2121,14 +2105,58 @@
             } catch (e) { console.error('Resume cloud sync failed:', e); }
         }
 
-        async function populateResumeDropdown(selectedId = '') {
-            const resumes = await getAllResumes();
-            const countEl = document.getElementById('resumeCount');
-            if (countEl) countEl.textContent = resumes.length > 0 ? `(${resumes.length} saved)` : '';
-            resumeIdSelect.innerHTML = '<option value="">-- Select Resume --</option>' +
-                resumes.map(r => `<option value="${r.id}" ${r.id === selectedId ? 'selected' : ''}>${escapeHtml(r.fileName || r.name)}</option>`).join('');
+        // Show/hide resume UI based on whether resumeId exists
+        async function showResumeUI(resumeId) {
+            if (resumeId) {
+                const resume = await getResumeById(resumeId);
+                if (resume) {
+                    linkedResumeName.textContent = resume.fileName || resume.name;
+                    resumeLinked.style.display = 'flex';
+                    resumeUploadSection.style.display = 'none';
+                    resumeIdField.value = resumeId;
+                    currentLinkedResumeId = resumeId;
+                    return;
+                }
+            }
+            // No resume or not found - show upload
+            resumeLinked.style.display = 'none';
+            resumeUploadSection.style.display = 'block';
+            resumeIdField.value = '';
+            currentLinkedResumeId = null;
         }
 
+        // View linked resume
+        async function viewLinkedResume() {
+            if (!currentLinkedResumeId) return;
+            const resume = await getResumeById(currentLinkedResumeId);
+            if (!resume || !resume.fileData) {
+                showToast('Resume not found', false, true);
+                return;
+            }
+            // Open in new tab
+            const win = window.open('', '_blank');
+            if (resume.fileType === 'application/pdf') {
+                win.document.write(`<iframe src="${resume.fileData}" style="width:100%;height:100%;border:none;"></iframe>`);
+            } else {
+                // Download non-PDF files
+                const a = document.createElement('a');
+                a.href = resume.fileData;
+                a.download = resume.fileName;
+                a.click();
+            }
+        }
+        window.viewLinkedResume = viewLinkedResume;
+
+        // Unlink resume from current form
+        function unlinkResume() {
+            resumeIdField.value = '';
+            currentLinkedResumeId = null;
+            resumeLinked.style.display = 'none';
+            resumeUploadSection.style.display = 'block';
+        }
+        window.unlinkResume = unlinkResume;
+
+        // Upload handler
         resumeUpload.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -2146,24 +2174,11 @@
                 };
                 await saveResume(resume);
                 await syncResumeToCloud(resume);
-
-                // Auto-link and show the uploaded resume
-                document.getElementById('resumeIdHidden').value = resume.id;
-                await showResumeSection(resume.id);
-
-                showToast(`Resume "${file.name}" uploaded & linked`);
+                await showResumeUI(resume.id);
+                showToast(`Resume "${file.name}" uploaded`);
                 resumeUpload.value = '';
             };
             reader.readAsDataURL(file);
-        });
-
-        // Also link when selecting from dropdown
-        resumeIdSelect.addEventListener('change', async (e) => {
-            const selectedId = e.target.value;
-            if (selectedId) {
-                document.getElementById('resumeIdHidden').value = selectedId;
-                await showResumeSection(selectedId);
-            }
         });
 
         // Sync resumes when app loads
