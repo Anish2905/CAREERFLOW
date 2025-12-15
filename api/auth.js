@@ -31,9 +31,14 @@ module.exports = async (req, res) => {
     }
 
     try {
+        console.log('Auth: Starting...');
+        console.log('Auth: initSchema...');
         await initSchema();
+        console.log('Auth: getDb...');
         const db = getDb();
+        console.log('Auth: parsing body...');
         const { username, pin, action } = req.body;
+        console.log('Auth: got username:', username, 'action:', action);
 
         if (!username || !pin) {
             return res.status(400).json({ error: 'Username and PIN required' });
@@ -50,6 +55,7 @@ module.exports = async (req, res) => {
         const usernameLC = username.toLowerCase();
 
         if (action === 'register') {
+            console.log('Auth: registering...');
             // Check if exists
             const existing = await db.execute({
                 sql: 'SELECT id FROM users WHERE username = ?',
@@ -69,8 +75,10 @@ module.exports = async (req, res) => {
             });
 
             const token = jwt.sign({ userId: id }, JWT_SECRET, { expiresIn: '30d' });
+            console.log('Auth: register success');
             return res.status(201).json({ token, userId: id });
         } else {
+            console.log('Auth: logging in...');
             // Login
             const result = await db.execute({
                 sql: 'SELECT id, pin_hash FROM users WHERE username = ?',
@@ -89,10 +97,12 @@ module.exports = async (req, res) => {
             }
 
             const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '30d' });
+            console.log('Auth: login success');
             return res.json({ token, userId: user.id });
         }
     } catch (error) {
-        console.error('Auth error:', error);
-        return res.status(500).json({ error: 'Server error' });
+        console.error('Auth error:', error.message);
+        console.error('Auth error stack:', error.stack);
+        return res.status(500).json({ error: 'Server error: ' + error.message });
     }
 };
