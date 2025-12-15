@@ -1,823 +1,1441 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Job Applicant Tracker</title>
-  <meta name="description" content="Track your job applications, interviews, and offers in one place.">
-  <style>
-    /* ===== Design Tokens ===== */
-    :root {
-      /* HSL Color Palette */
-      --color-primary-h: 220;
-      --color-primary-s: 70%;
-      --color-primary-l: 50%;
-      --color-primary: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
-      --color-primary-hover: hsl(var(--color-primary-h), var(--color-primary-s), 40%);
-      
-      --color-bg: hsl(220, 15%, 97%);
-      --color-surface: hsl(0, 0%, 100%);
-      --color-text: hsl(220, 20%, 15%);
-      --color-text-secondary: hsl(220, 10%, 45%);
-      --color-border: hsl(220, 15%, 88%);
-      
-      /* Status Colors (HSL) */
-      --color-wishlist: hsl(200, 70%, 50%);
-      --color-applied: hsl(280, 60%, 55%);
-      --color-interview: hsl(40, 90%, 50%);
-      --color-offer: hsl(150, 60%, 45%);
-      --color-accepted: hsl(140, 70%, 40%);
-      --color-rejected: hsl(0, 65%, 55%);
-      
-      /* Shadow Elevation System */
-      --shadow-button: 0 1px 2px hsla(220, 20%, 15%, 0.15);
-      --shadow-card: 0 4px 8px hsla(220, 20%, 15%, 0.1);
-      --shadow-modal: 0 12px 24px hsla(220, 20%, 15%, 0.2);
-      
-      /* Spacing Scale */
-      --space-1: 4px;
-      --space-2: 8px;
-      --space-3: 12px;
-      --space-4: 16px;
-      --space-5: 24px;
-      --space-6: 32px;
-      --space-7: 48px;
-      
-      /* Typography */
-      --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-      --line-height-body: 1.5;
-      --line-height-heading: 1.2;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Tracker</title>
+    <meta name="description" content="Track your job applications, interviews, and offers in one place.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ===== Design Tokens (following rules) ===== */
+        :root {
+            /* HSL Color Palette - Primary */
+            --hue-primary: 250;
+            --color-primary: hsl(var(--hue-primary), 85%, 60%);
+            --color-primary-hover: hsl(var(--hue-primary), 85%, 50%);
+            --color-primary-light: hsl(var(--hue-primary), 85%, 95%);
 
-    /* ===== Reset & Base ===== */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+            /* Background & Surface */
+            --color-bg: hsl(240, 20%, 98%);
+            --color-surface: hsl(0, 0%, 100%);
+            --color-surface-elevated: hsl(0, 0%, 100%);
 
-    body {
-      font-family: var(--font-family);
-      background: var(--color-bg);
-      color: var(--color-text);
-      line-height: var(--line-height-body);
-      min-height: 100vh;
-    }
+            /* Text - using weight for hierarchy, not just size */
+            --color-text: hsl(240, 25%, 12%);
+            --color-text-secondary: hsl(240, 10%, 50%);
+            --color-text-tertiary: hsl(240, 8%, 65%);
 
-    /* ===== Layout ===== */
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: var(--space-4);
-    }
+            --color-border: hsl(240, 15%, 90%);
+            --color-border-hover: hsl(240, 15%, 80%);
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-5);
-      flex-wrap: wrap;
-      gap: var(--space-3);
-    }
+            /* Status Colors (HSL) - vibrant but balanced */
+            --color-wishlist: hsl(200, 80%, 55%);
+            --color-applied: hsl(270, 70%, 60%);
+            --color-interview: hsl(35, 95%, 55%);
+            --color-offer: hsl(155, 65%, 45%);
+            --color-accepted: hsl(145, 75%, 38%);
+            --color-rejected: hsl(0, 70%, 58%);
 
-    h1 {
-      font-size: 24px;
-      line-height: var(--line-height-heading);
-      font-weight: 600;
-    }
+            /* Shadow Elevation System (per rules: button 1/2, card 4/8, modal 12/24) */
+            --shadow-button: 0 1px 2px hsla(240, 25%, 12%, 0.08);
+            --shadow-card: 0 4px 8px hsla(240, 25%, 12%, 0.06), 0 1px 3px hsla(240, 25%, 12%, 0.08);
+            --shadow-card-hover: 0 8px 16px hsla(240, 25%, 12%, 0.1), 0 2px 4px hsla(240, 25%, 12%, 0.08);
+            --shadow-modal: 0 12px 24px hsla(240, 25%, 12%, 0.15), 0 4px 8px hsla(240, 25%, 12%, 0.1);
 
-    /* ===== Buttons ===== */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--space-2);
-      min-height: 44px;
-      min-width: 44px;
-      padding: var(--space-2) var(--space-4);
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background-color 0.15s, transform 0.1s;
-      box-shadow: var(--shadow-button);
-    }
+            /* Spacing Scale (from rules: 4,8,12,16,24,32,48,64) */
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-5: 24px;
+            --space-6: 32px;
+            --space-7: 48px;
+            --space-8: 64px;
 
-    .btn:active {
-      transform: scale(0.98);
-    }
+            /* Typography - Inter for premium feel */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-size-xs: 12px;
+            --font-size-sm: 14px;
+            --font-size-base: 15px;
+            --font-size-lg: 18px;
+            --font-size-xl: 24px;
+            --font-size-2xl: 32px;
 
-    .btn-primary {
-      background: var(--color-primary);
-      color: white;
-    }
+            /* Line height (per rules: 1.5-1.7 for <16px, 1.1-1.25 for >24px) */
+            --line-height-tight: 1.2;
+            --line-height-base: 1.5;
+            --line-height-relaxed: 1.6;
 
-    .btn-primary:hover {
-      background: var(--color-primary-hover);
-    }
+            /* Border radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
 
-    .btn-secondary {
-      background: var(--color-surface);
-      color: var(--color-text);
-      border: 1px solid var(--color-border);
-    }
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.2s ease;
+        }
 
-    .btn-secondary:hover {
-      background: var(--color-bg);
-    }
+        /* ===== Dark Mode (HSL-based, per rules) ===== */
+        [data-theme="dark"] {
+            --color-primary: hsl(var(--hue-primary), 80%, 65%);
+            --color-primary-hover: hsl(var(--hue-primary), 80%, 70%);
+            --color-primary-light: hsl(var(--hue-primary), 40%, 20%);
 
-    .btn-danger {
-      background: hsl(0, 65%, 55%);
-      color: white;
-    }
+            --color-bg: hsl(240, 15%, 10%);
+            --color-surface: hsl(240, 12%, 14%);
+            --color-surface-elevated: hsl(240, 12%, 18%);
 
-    .btn-danger:hover {
-      background: hsl(0, 65%, 45%);
-    }
+            --color-text: hsl(240, 15%, 95%);
+            --color-text-secondary: hsl(240, 10%, 65%);
+            --color-text-tertiary: hsl(240, 8%, 50%);
 
-    .btn-icon {
-      padding: var(--space-2);
-      background: transparent;
-      box-shadow: none;
-    }
+            --color-border: hsl(240, 10%, 22%);
+            --color-border-hover: hsl(240, 10%, 32%);
 
-    .btn-icon:hover {
-      background: var(--color-bg);
-    }
+            /* Adjusted shadows for dark mode */
+            --shadow-button: 0 1px 2px hsla(0, 0%, 0%, 0.3);
+            --shadow-card: 0 4px 8px hsla(0, 0%, 0%, 0.4), 0 1px 3px hsla(0, 0%, 0%, 0.3);
+            --shadow-card-hover: 0 8px 16px hsla(0, 0%, 0%, 0.5), 0 2px 4px hsla(0, 0%, 0%, 0.3);
+            --shadow-modal: 0 12px 24px hsla(0, 0%, 0%, 0.6), 0 4px 8px hsla(0, 0%, 0%, 0.4);
+        }
 
-    /* ===== Stats Bar ===== */
-    .stats-bar {
-      display: flex;
-      gap: var(--space-2);
-      flex-wrap: wrap;
-      margin-bottom: var(--space-5);
-    }
+        /* Dark mode status badges - proper contrast */
+        [data-theme="dark"] .status-wishlist {
+            background: hsl(200, 60%, 20%);
+            color: hsl(200, 80%, 70%);
+        }
 
-    .stat {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      padding: var(--space-2) var(--space-3);
-      background: var(--color-surface);
-      border-radius: 8px;
-      font-size: 13px;
-      box-shadow: var(--shadow-button);
-    }
+        [data-theme="dark"] .status-applied {
+            background: hsl(270, 50%, 22%);
+            color: hsl(270, 70%, 75%);
+        }
 
-    .stat-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
+        [data-theme="dark"] .status-interview {
+            background: hsl(35, 70%, 18%);
+            color: hsl(35, 95%, 70%);
+        }
 
-    .stat-count {
-      font-weight: 600;
-    }
+        [data-theme="dark"] .status-offer {
+            background: hsl(155, 50%, 18%);
+            color: hsl(155, 65%, 60%);
+        }
 
-    /* ===== Controls ===== */
-    .controls {
-      display: flex;
-      gap: var(--space-3);
-      margin-bottom: var(--space-4);
-      flex-wrap: wrap;
-    }
+        [data-theme="dark"] .status-accepted {
+            background: hsl(145, 55%, 16%);
+            color: hsl(145, 75%, 55%);
+        }
 
-    .select-wrap {
-      position: relative;
-    }
+        [data-theme="dark"] .status-rejected {
+            background: hsl(0, 50%, 20%);
+            color: hsl(0, 70%, 70%);
+        }
 
-    select {
-      appearance: none;
-      min-height: 44px;
-      padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      background: var(--color-surface);
-      font-size: 14px;
-      cursor: pointer;
-    }
+        /* Dark mode auth gradient */
+        [data-theme="dark"] .auth-container {
+            background: linear-gradient(135deg, hsl(var(--hue-primary), 30%, 12%) 0%, hsl(200, 30%, 12%) 100%);
+        }
 
-    select:focus {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
+        /* Dark mode auth error */
+        [data-theme="dark"] .auth-error {
+            background: hsl(0, 50%, 15%);
+            color: hsl(0, 70%, 70%);
+            border-left-color: hsl(0, 70%, 45%);
+        }
 
-    .select-wrap::after {
-      content: '▼';
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 10px;
-      pointer-events: none;
-      color: var(--color-text-secondary);
-    }
+        /* ===== Reset ===== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    /* ===== Application Cards ===== */
-    .app-list {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-3);
-    }
+        body {
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: var(--line-height-base);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    .app-card {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: var(--space-3);
-      padding: var(--space-4);
-      background: var(--color-surface);
-      border-radius: 12px;
-      box-shadow: var(--shadow-card);
-    }
+        /* ===== Layout ===== */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: var(--space-5);
+        }
 
-    .app-card-main {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-1);
-    }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-5);
+            border-bottom: 1px solid var(--color-border);
+        }
 
-    .app-company {
-      font-size: 16px;
-      font-weight: 600;
-      line-height: var(--line-height-heading);
-    }
+        h1 {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            line-height: var(--line-height-tight);
+            letter-spacing: -0.02em;
+            color: var(--color-text);
+        }
 
-    .app-position {
-      color: var(--color-text-secondary);
-      font-size: 14px;
-    }
+        /* ===== Buttons (min 44px touch target per rules) ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-2);
+            min-height: 44px;
+            min-width: 44px;
+            padding: var(--space-3) var(--space-5);
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            box-shadow: var(--shadow-button);
+        }
 
-    .app-meta {
-      display: flex;
-      align-items: center;
-      gap: var(--space-3);
-      margin-top: var(--space-2);
-      font-size: 13px;
-      color: var(--color-text-secondary);
-    }
+        .btn:active {
+            transform: scale(0.97);
+        }
 
-    .app-status {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-1);
-      padding: var(--space-1) var(--space-2);
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 500;
-      text-transform: capitalize;
-    }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-    .app-card-actions {
-      display: flex;
-      gap: var(--space-1);
-      align-items: flex-start;
-    }
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
 
-    /* Status Badge Colors */
-    .status-wishlist { background: hsla(200, 70%, 50%, 0.15); color: hsl(200, 70%, 35%); }
-    .status-applied { background: hsla(280, 60%, 55%, 0.15); color: hsl(280, 60%, 40%); }
-    .status-interview { background: hsla(40, 90%, 50%, 0.15); color: hsl(40, 90%, 35%); }
-    .status-offer { background: hsla(150, 60%, 45%, 0.15); color: hsl(150, 60%, 30%); }
-    .status-accepted { background: hsla(140, 70%, 40%, 0.15); color: hsl(140, 70%, 25%); }
-    .status-rejected { background: hsla(0, 65%, 55%, 0.15); color: hsl(0, 65%, 40%); }
+        .btn-primary:hover:not(:disabled) {
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px hsla(var(--hue-primary), 85%, 50%, 0.35);
+        }
 
-    /* Stat Dot Colors */
-    .dot-wishlist { background: var(--color-wishlist); }
-    .dot-applied { background: var(--color-applied); }
-    .dot-interview { background: var(--color-interview); }
-    .dot-offer { background: var(--color-offer); }
-    .dot-accepted { background: var(--color-accepted); }
-    .dot-rejected { background: var(--color-rejected); }
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
 
-    /* ===== Empty State ===== */
-    .empty-state {
-      text-align: center;
-      padding: var(--space-7);
-      color: var(--color-text-secondary);
-    }
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--color-bg);
+            border-color: var(--color-border-hover);
+        }
 
-    .empty-state-icon {
-      font-size: 48px;
-      margin-bottom: var(--space-4);
-      opacity: 0.5;
-    }
+        .btn-icon {
+            padding: var(--space-2);
+            background: transparent;
+            box-shadow: none;
+            color: var(--color-text-tertiary);
+            border-radius: var(--radius-sm);
+        }
 
-    .empty-state h2 {
-      font-size: 18px;
-      margin-bottom: var(--space-2);
-      color: var(--color-text);
-    }
+        .btn-icon:hover:not(:disabled) {
+            background: var(--color-primary-light);
+            color: var(--color-primary);
+        }
 
-    .empty-state p {
-      margin-bottom: var(--space-4);
-    }
+        /* ===== Auth Page ===== */
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: var(--space-5);
+            background: linear-gradient(135deg, hsl(var(--hue-primary), 85%, 97%) 0%, hsl(200, 80%, 97%) 100%);
+        }
 
-    /* ===== Modal ===== */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: hsla(220, 20%, 15%, 0.5);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-4);
-    }
+        .auth-card {
+            width: 100%;
+            max-width: 380px;
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-modal);
+            padding: var(--space-7);
+        }
 
-    .modal-backdrop.active {
-      display: flex;
-    }
+        .auth-logo {
+            text-align: center;
+            margin-bottom: var(--space-6);
+        }
 
-    .modal {
-      width: 100%;
-      max-width: 480px;
-      max-height: 90vh;
-      overflow-y: auto;
-      background: var(--color-surface);
-      border-radius: 16px;
-      box-shadow: var(--shadow-modal);
-    }
+        .auth-logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, hsl(280, 80%, 60%) 100%);
+            border-radius: var(--radius-lg);
+            font-size: 28px;
+            margin-bottom: var(--space-3);
+            box-shadow: 0 8px 24px hsla(var(--hue-primary), 85%, 50%, 0.3);
+        }
 
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--space-4);
-      border-bottom: 1px solid var(--color-border);
-    }
+        .auth-logo h1 {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+        }
 
-    .modal-header h2 {
-      font-size: 18px;
-      line-height: var(--line-height-heading);
-    }
+        .auth-logo p {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-top: var(--space-1);
+        }
 
-    .modal-body {
-      padding: var(--space-4);
-    }
+        .auth-tabs {
+            display: flex;
+            background: var(--color-bg);
+            border-radius: var(--radius-sm);
+            padding: var(--space-1);
+            margin-bottom: var(--space-5);
+        }
 
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--space-2);
-      padding: var(--space-4);
-      border-top: 1px solid var(--color-border);
-    }
+        .auth-tab {
+            flex: 1;
+            padding: var(--space-3);
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--color-text-secondary);
+            transition: all var(--transition-fast);
+        }
 
-    /* ===== Form ===== */
-    .form-group {
-      margin-bottom: var(--space-4);
-    }
+        .auth-tab.active {
+            background: var(--color-surface);
+            color: var(--color-text);
+            box-shadow: var(--shadow-button);
+        }
 
-    .form-group label {
-      display: block;
-      margin-bottom: var(--space-1);
-      font-size: 14px;
-      font-weight: 500;
-    }
+        .auth-error {
+            background: hsl(0, 80%, 96%);
+            color: hsl(0, 70%, 45%);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-sm);
+            margin-bottom: var(--space-4);
+            font-size: var(--font-size-sm);
+            display: none;
+            border-left: 3px solid hsl(0, 70%, 55%);
+        }
 
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      min-height: 44px;
-      padding: var(--space-2) var(--space-3);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      font-size: 14px;
-      font-family: inherit;
-    }
+        .auth-error.visible {
+            display: block;
+        }
 
-    .form-group textarea {
-      min-height: 88px;
-      resize: vertical;
-    }
+        /* ===== PIN Input ===== */
+        .pin-label {
+            display: block;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            margin-bottom: var(--space-3);
+            color: var(--color-text);
+        }
 
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: 2px solid var(--color-primary);
-      outline-offset: 2px;
-    }
+        .pin-input-group {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-3);
+            margin-bottom: var(--space-5);
+        }
 
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-3);
-    }
+        .pin-input {
+            width: 52px;
+            height: 60px;
+            text-align: center;
+            font-family: inherit;
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            color: var(--color-text);
+            border: 2px solid var(--color-border);
+            border-radius: var(--radius-md);
+            background: var(--color-bg);
+            transition: all var(--transition-fast);
+        }
 
-    /* ===== Toast ===== */
-    .toast {
-      position: fixed;
-      bottom: var(--space-4);
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      padding: var(--space-3) var(--space-4);
-      background: var(--color-text);
-      color: white;
-      border-radius: 8px;
-      font-size: 14px;
-      box-shadow: var(--shadow-modal);
-      transition: transform 0.3s ease;
-      z-index: 200;
-    }
+        .pin-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background: var(--color-surface);
+            box-shadow: 0 0 0 4px hsla(var(--hue-primary), 85%, 60%, 0.15);
+        }
 
-    .toast.visible {
-      transform: translateX(-50%) translateY(0);
-    }
+        /* ===== Stats Bar ===== */
+        .stats-bar {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-5);
+        }
 
-    .toast-undo {
-      padding: var(--space-1) var(--space-2);
-      background: transparent;
-      border: 1px solid white;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-      min-height: 32px;
-    }
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-4);
+            background: var(--color-surface);
+            border-radius: 100px;
+            font-size: var(--font-size-sm);
+            box-shadow: var(--shadow-button);
+            transition: transform var(--transition-fast);
+        }
 
-    .toast-undo:hover {
-      background: hsla(0, 0%, 100%, 0.1);
-    }
+        .stat:hover {
+            transform: translateY(-1px);
+        }
 
-    /* ===== Responsive ===== */
-    @media (max-width: 600px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-      
-      .app-card {
-        grid-template-columns: 1fr;
-      }
-      
-      .app-card-actions {
-        justify-content: flex-end;
-      }
-    }
-  </style>
+        .stat-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .stat-count {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .stat-label {
+            color: var(--color-text-secondary);
+            text-transform: capitalize;
+        }
+
+        /* ===== Controls ===== */
+        .controls {
+            display: flex;
+            gap: var(--space-3);
+            margin-bottom: var(--space-5);
+        }
+
+        .select-wrap {
+            position: relative;
+        }
+
+        select {
+            appearance: none;
+            min-height: 44px;
+            padding: var(--space-3) var(--space-7) var(--space-3) var(--space-4);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            background: var(--color-surface);
+            font-family: inherit;
+            font-size: var(--font-size-sm);
+            color: var(--color-text);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        select:hover {
+            border-color: var(--color-border-hover);
+        }
+
+        select:focus {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
+        }
+
+        .select-wrap::after {
+            content: '';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--color-text-tertiary);
+            pointer-events: none;
+        }
+
+        /* ===== Application Cards ===== */
+        .app-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+
+        .app-card {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: var(--space-4);
+            padding: var(--space-5);
+            background: var(--color-surface);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            transition: all var(--transition-base);
+            border: 1px solid transparent;
+        }
+
+        .app-card:hover {
+            box-shadow: var(--shadow-card-hover);
+            transform: translateY(-2px);
+            border-color: var(--color-border);
+        }
+
+        .app-card-main {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .app-company {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            line-height: var(--line-height-tight);
+            color: var(--color-text);
+        }
+
+        .app-position {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            font-weight: 400;
+        }
+
+        .app-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--space-4);
+            margin-top: var(--space-2);
+            font-size: var(--font-size-xs);
+        }
+
+        .app-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px var(--space-3);
+            border-radius: 100px;
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            text-transform: capitalize;
+            letter-spacing: 0.02em;
+        }
+
+        .app-meta-item {
+            color: var(--color-text-tertiary);
+        }
+
+        .app-meta a {
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .app-meta a:hover {
+            text-decoration: underline;
+        }
+
+        .app-notes {
+            margin-top: var(--space-3);
+            padding-top: var(--space-3);
+            border-top: 1px solid var(--color-border);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            line-height: var(--line-height-relaxed);
+        }
+
+        .app-card-actions {
+            display: flex;
+            gap: var(--space-1);
+            align-items: flex-start;
+            opacity: 0.5;
+            transition: opacity var(--transition-fast);
+        }
+
+        .app-card:hover .app-card-actions {
+            opacity: 1;
+        }
+
+        /* Status Badge Colors - using tints of status color (per rule: no grey on colored bg) */
+        .status-wishlist {
+            background: hsl(200, 80%, 93%);
+            color: hsl(200, 80%, 35%);
+        }
+
+        .status-applied {
+            background: hsl(270, 70%, 93%);
+            color: hsl(270, 70%, 40%);
+        }
+
+        .status-interview {
+            background: hsl(35, 95%, 90%);
+            color: hsl(35, 95%, 30%);
+        }
+
+        .status-offer {
+            background: hsl(155, 65%, 90%);
+            color: hsl(155, 65%, 28%);
+        }
+
+        .status-accepted {
+            background: hsl(145, 75%, 90%);
+            color: hsl(145, 75%, 25%);
+        }
+
+        .status-rejected {
+            background: hsl(0, 70%, 93%);
+            color: hsl(0, 70%, 40%);
+        }
+
+        .dot-wishlist {
+            background: var(--color-wishlist);
+        }
+
+        .dot-applied {
+            background: var(--color-applied);
+        }
+
+        .dot-interview {
+            background: var(--color-interview);
+        }
+
+        .dot-offer {
+            background: var(--color-offer);
+        }
+
+        .dot-accepted {
+            background: var(--color-accepted);
+        }
+
+        .dot-rejected {
+            background: var(--color-rejected);
+        }
+
+        /* ===== Empty State (per rule: intentional with clear CTA) ===== */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-8) var(--space-5);
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+        }
+
+        .empty-state-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--color-primary-light) 0%, hsl(200, 80%, 95%) 100%);
+            border-radius: var(--radius-lg);
+            font-size: 36px;
+            margin-bottom: var(--space-5);
+        }
+
+        .empty-state h2 {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+            color: var(--color-text);
+        }
+
+        .empty-state p {
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-5);
+        }
+
+        .loading {
+            text-align: center;
+            padding: var(--space-7);
+            color: var(--color-text-secondary);
+        }
+
+        /* ===== Modal ===== */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: hsla(240, 25%, 12%, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-5);
+        }
+
+        .modal-backdrop.active {
+            display: flex;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: var(--color-surface);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-modal);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-5) var(--space-6);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-header h2 {
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: var(--space-6);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-3);
+            padding: var(--space-5) var(--space-6);
+            border-top: 1px solid var(--color-border);
+            background: var(--color-bg);
+            border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+        }
+
+        /* ===== Form ===== */
+        .form-group {
+            margin-bottom: var(--space-5);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: var(--space-2);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            color: var(--color-text);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            min-height: 44px;
+            padding: var(--space-3) var(--space-4);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: var(--font-size-sm);
+            color: var(--color-text);
+            background: var(--color-surface);
+            transition: all var(--transition-fast);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: var(--line-height-relaxed);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: var(--color-border-hover);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 4px hsla(var(--hue-primary), 85%, 60%, 0.15);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--color-text-tertiary);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-4);
+        }
+
+        /* ===== Toast (immediate feedback per rules) ===== */
+        .toast {
+            position: fixed;
+            bottom: var(--space-6);
+            left: 50%;
+            transform: translateX(-50%) translateY(calc(100% + 32px));
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            padding: var(--space-4) var(--space-5);
+            background: var(--color-text);
+            color: white;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            box-shadow: var(--shadow-modal);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 200;
+        }
+
+        .toast.visible {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.error {
+            background: hsl(0, 70%, 50%);
+        }
+
+        .toast-undo {
+            padding: var(--space-2) var(--space-3);
+            background: hsla(0, 0%, 100%, 0.2);
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            min-height: 32px;
+            transition: background var(--transition-fast);
+        }
+
+        .toast-undo:hover {
+            background: hsla(0, 0%, 100%, 0.3);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: var(--space-4);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .app-card {
+                grid-template-columns: 1fr;
+                padding: var(--space-4);
+            }
+
+            .app-card-actions {
+                justify-content: flex-end;
+                opacity: 1;
+            }
+
+            .auth-card {
+                padding: var(--space-5);
+            }
+
+            .modal-body,
+            .modal-header,
+            .modal-footer {
+                padding-left: var(--space-4);
+                padding-right: var(--space-4);
+            }
+        }
+    </style>
 </head>
+
 <body>
-  <div class="container">
-    <header>
-      <h1>Job Tracker</h1>
-      <button class="btn btn-primary" id="addBtn">
-        <span>+</span> Add Application
-      </button>
-    </header>
-
-    <div class="stats-bar" id="statsBar"></div>
-
-    <div class="controls">
-      <div class="select-wrap">
-        <select id="filterStatus">
-          <option value="all">All Statuses</option>
-          <option value="wishlist">Wishlist</option>
-          <option value="applied">Applied</option>
-          <option value="interview">Interview</option>
-          <option value="offer">Offer</option>
-          <option value="accepted">Accepted</option>
-          <option value="rejected">Rejected</option>
-        </select>
-      </div>
-      <div class="select-wrap">
-        <select id="sortBy">
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-          <option value="company">By Company</option>
-        </select>
-      </div>
+    <!-- Auth View -->
+    <div class="auth-container" id="authView">
+        <div class="auth-card" style="position: relative;">
+            <button class="btn btn-icon" id="authThemeToggle" aria-label="Toggle theme" title="Toggle dark mode"
+                style="position: absolute; top: var(--space-4); right: var(--space-4);">🌙</button>
+            <div class="auth-logo">
+                <div class="auth-logo-icon">📋</div>
+                <h1>Job Tracker</h1>
+                <p>Track your applications</p>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="loginTab">Sign In</button>
+                <button class="auth-tab" id="registerTab">Create Account</button>
+            </div>
+            <div class="auth-error" id="authError"></div>
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="authUsername">Username</label>
+                    <input type="text" id="authUsername" required minlength="3" autocomplete="username"
+                        placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <span class="pin-label">4-Digit PIN</span>
+                    <div class="pin-input-group">
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]"
+                            data-pin="0">
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]"
+                            data-pin="1">
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]"
+                            data-pin="2">
+                        <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]"
+                            data-pin="3">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="authSubmit">Sign In</button>
+            </form>
+        </div>
     </div>
 
-    <div class="app-list" id="appList"></div>
-
-    <div class="empty-state" id="emptyState" style="display: none;">
-      <div class="empty-state-icon">📋</div>
-      <h2>No applications yet</h2>
-      <p>Start tracking your job search</p>
-      <button class="btn btn-primary" id="addBtnEmpty">Add Your First Application</button>
+    <!-- App View -->
+    <div class="container hidden" id="appView">
+        <header>
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+                <h1>My Applications</h1>
+                <span id="statusIndicator" style="font-size: var(--font-size-xs); font-weight: 500;">🟢 Online</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+                <button class="btn btn-icon" id="themeToggle" aria-label="Toggle theme"
+                    title="Toggle dark mode">🌙</button>
+                <button class="btn btn-icon" id="exportBtn" aria-label="Export to CSV" title="Export to CSV">📥</button>
+                <button class="btn btn-primary" id="addBtn">+ Add</button>
+                <button class="btn btn-secondary" id="logoutBtn">Logout</button>
+            </div>
+        </header>
+        <div class="stats-bar" id="statsBar"></div>
+        <div class="controls">
+            <div class="select-wrap">
+                <select id="filterStatus">
+                    <option value="all">All Statuses</option>
+                    <option value="wishlist">Wishlist</option>
+                    <option value="applied">Applied</option>
+                    <option value="interview">Interview</option>
+                    <option value="offer">Offer</option>
+                    <option value="accepted">Accepted</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <div class="select-wrap">
+                <select id="sortBy">
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="company">By Company</option>
+                </select>
+            </div>
+        </div>
+        <div class="loading" id="loading">Loading applications...</div>
+        <div class="app-list" id="appList"></div>
+        <div class="empty-state hidden" id="emptyState">
+            <div class="empty-state-icon">📋</div>
+            <h2>No applications yet</h2>
+            <p>Start tracking your job search journey</p>
+            <button class="btn btn-primary" id="addBtnEmpty">Add Your First Application</button>
+        </div>
     </div>
-  </div>
 
-  <!-- Modal -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal" role="dialog" aria-labelledby="modalTitle">
-      <div class="modal-header">
-        <h2 id="modalTitle">Add Application</h2>
-        <button class="btn btn-icon" id="closeModal" aria-label="Close">✕</button>
-      </div>
-      <form id="appForm">
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="company">Company *</label>
-            <input type="text" id="company" name="company" required>
-          </div>
-          <div class="form-group">
-            <label for="position">Position *</label>
-            <input type="text" id="position" name="position" required>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="status">Status</label>
-              <select id="status" name="status">
-                <option value="wishlist">Wishlist</option>
-                <option value="applied">Applied</option>
-                <option value="interview">Interview</option>
-                <option value="offer">Offer</option>
-                <option value="accepted">Accepted</option>
-                <option value="rejected">Rejected</option>
-              </select>
+    <!-- Modal -->
+    <div class="modal-backdrop" id="modalBackdrop">
+        <div class="modal" role="dialog" aria-labelledby="modalTitle">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add Application</h2>
+                <button class="btn btn-icon" id="closeModal" aria-label="Close">✕</button>
             </div>
-            <div class="form-group">
-              <label for="appliedDate">Date</label>
-              <input type="date" id="appliedDate" name="appliedDate">
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="url">Job URL</label>
-            <input type="url" id="url" name="url" placeholder="https://...">
-          </div>
-          <div class="form-group">
-            <label for="notes">Notes</label>
-            <textarea id="notes" name="notes" placeholder="Interview feedback, contacts, etc."></textarea>
-          </div>
+            <form id="appForm">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" id="company" name="company" required placeholder="e.g. Google">
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Position</label>
+                        <input type="text" id="position" name="position" required placeholder="e.g. Software Engineer">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status">
+                                <option value="wishlist">Wishlist</option>
+                                <option value="applied">Applied</option>
+                                <option value="interview">Interview</option>
+                                <option value="offer">Offer</option>
+                                <option value="accepted">Accepted</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="appliedDate">Date Applied</label>
+                            <input type="date" id="appliedDate" name="appliedDate">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="url">Job Posting URL</label>
+                        <input type="url" id="url" name="url" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes"
+                            placeholder="Interview details, contacts, follow-ups..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save Application</button>
+                </div>
+            </form>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-          <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
-        </div>
-      </form>
     </div>
-  </div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast">
-    <span id="toastMessage"></span>
-    <button class="toast-undo" id="toastUndo" style="display: none;">Undo</button>
-  </div>
+    <div class="toast" id="toast"><span id="toastMessage"></span><button class="toast-undo" id="toastUndo"
+            style="display: none;">Undo</button></div>
 
-  <script>
-    // ===== State =====
-    const STORAGE_KEY = 'job_tracker_apps';
-    let applications = [];
-    let editingId = null;
-    let deletedApp = null;
-    let toastTimeout = null;
+    <script>
+        // ===== Theme Toggle (respects system preference, persists choice) =====
+        const THEME_KEY = 'job_tracker_theme';
+        const themeToggle = document.getElementById('themeToggle');
+        const authThemeToggle = document.getElementById('authThemeToggle');
 
-    // ===== DOM Elements =====
-    const appList = document.getElementById('appList');
-    const statsBar = document.getElementById('statsBar');
-    const emptyState = document.getElementById('emptyState');
-    const modalBackdrop = document.getElementById('modalBackdrop');
-    const modalTitle = document.getElementById('modalTitle');
-    const appForm = document.getElementById('appForm');
-    const filterStatus = document.getElementById('filterStatus');
-    const sortBy = document.getElementById('sortBy');
-    const toast = document.getElementById('toast');
-    const toastMessage = document.getElementById('toastMessage');
-    const toastUndo = document.getElementById('toastUndo');
+        function getPreferredTheme() {
+            const saved = localStorage.getItem(THEME_KEY);
+            if (saved) return saved;
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
 
-    // ===== UUID Generator =====
-    function generateId() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-        const r = Math.random() * 16 | 0;
-        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-      });
-    }
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem(THEME_KEY, theme);
+            const icon = theme === 'dark' ? '☀️' : '🌙';
+            if (themeToggle) themeToggle.textContent = icon;
+            if (authThemeToggle) authThemeToggle.textContent = icon;
+        }
 
-    // ===== Storage =====
-    function loadApplications() {
-      try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        applications = data ? JSON.parse(data) : [];
-      } catch {
-        applications = [];
-      }
-    }
+        function toggleTheme() {
+            const current = document.documentElement.getAttribute('data-theme') || 'light';
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        }
 
-    function saveApplications() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
-    }
+        setTheme(getPreferredTheme());
+        if (themeToggle) themeToggle.addEventListener('click', toggleTheme);
+        if (authThemeToggle) authThemeToggle.addEventListener('click', toggleTheme);
 
-    // ===== Rendering =====
-    function render() {
-      renderStats();
-      renderList();
-    }
+        // Listen for system preference changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem(THEME_KEY)) setTheme(e.matches ? 'dark' : 'light');
+        });
 
-    function renderStats() {
-      const counts = {
-        wishlist: 0, applied: 0, interview: 0, offer: 0, accepted: 0, rejected: 0
-      };
-      applications.forEach(app => counts[app.status]++);
-      
-      statsBar.innerHTML = Object.entries(counts)
-        .filter(([_, count]) => count > 0)
-        .map(([status, count]) => `
-          <div class="stat">
-            <span class="stat-dot dot-${status}"></span>
-            <span class="stat-count">${count}</span>
-            <span>${status}</span>
-          </div>
-        `).join('');
-    }
+        // ===== Connection Status Indicator =====
+        const statusIndicator = document.getElementById('statusIndicator');
+        function updateConnectionStatus() {
+            if (statusIndicator) {
+                const online = navigator.onLine;
+                statusIndicator.textContent = online ? '🟢 Online' : '🔴 Offline';
+                statusIndicator.style.color = online ? 'var(--color-accepted)' : 'var(--color-rejected)';
+            }
+        }
+        updateConnectionStatus();
+        window.addEventListener('online', updateConnectionStatus);
+        window.addEventListener('offline', updateConnectionStatus);
 
-    function renderList() {
-      const filter = filterStatus.value;
-      const sort = sortBy.value;
-      
-      let filtered = filter === 'all' 
-        ? [...applications]
-        : applications.filter(app => app.status === filter);
-      
-      filtered.sort((a, b) => {
-        if (sort === 'newest') return new Date(b.createdAt) - new Date(a.createdAt);
-        if (sort === 'oldest') return new Date(a.createdAt) - new Date(b.createdAt);
-        if (sort === 'company') return a.company.localeCompare(b.company);
-        return 0;
-      });
+        // ===== IndexedDB Local Storage =====
+        const DB_NAME = 'JobTrackerDB';
+        const DB_VERSION = 1;
+        let idb = null;
+        const SYNC_KEY = 'job_tracker_last_sync';
+        const PENDING_KEY = 'job_tracker_pending';
 
-      if (filtered.length === 0) {
-        appList.innerHTML = '';
-        emptyState.style.display = 'block';
-        return;
-      }
+        async function openIDB() {
+            if (idb) return idb;
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => { idb = request.result; resolve(idb); };
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('applications')) {
+                        const store = db.createObjectStore('applications', { keyPath: 'id' });
+                        store.createIndex('updatedAt', 'updatedAt');
+                    }
+                };
+            });
+        }
 
-      emptyState.style.display = 'none';
-      appList.innerHTML = filtered.map(app => `
-        <div class="app-card" data-id="${app.id}">
-          <div class="app-card-main">
-            <div class="app-company">${escapeHtml(app.company)}</div>
-            <div class="app-position">${escapeHtml(app.position)}</div>
-            <div class="app-meta">
-              <span class="app-status status-${app.status}">${app.status}</span>
-              ${app.appliedDate ? `<span>${formatDate(app.appliedDate)}</span>` : ''}
-              ${app.url ? `<a href="${escapeHtml(app.url)}" target="_blank" rel="noopener">View Job</a>` : ''}
-            </div>
-            ${app.notes ? `<div class="app-notes" style="margin-top: var(--space-2); font-size: 13px; color: var(--color-text-secondary);">${escapeHtml(app.notes)}</div>` : ''}
-          </div>
-          <div class="app-card-actions">
-            <button class="btn btn-icon" onclick="editApp('${app.id}')" aria-label="Edit">✏️</button>
-            <button class="btn btn-icon" onclick="deleteApp('${app.id}')" aria-label="Delete">🗑️</button>
-          </div>
-        </div>
-      `).join('');
-    }
+        async function getAllLocal() {
+            const db = await openIDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('applications', 'readonly');
+                const store = tx.objectStore('applications');
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result.filter(a => !a.deletedAt));
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
+        async function saveLocal(app) {
+            const db = await openIDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('applications', 'readwrite');
+                const store = tx.objectStore('applications');
+                store.put(app);
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            });
+        }
 
-    function formatDate(dateStr) {
-      try {
-        return new Date(dateStr).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-      } catch {
-        return dateStr;
-      }
-    }
+        async function deleteLocal(id) {
+            const db = await openIDB();
+            const app = await getLocalById(id);
+            if (app) {
+                app.deletedAt = new Date().toISOString();
+                app.updatedAt = app.deletedAt;
+                await saveLocal(app);
+            }
+        }
 
-    // ===== Modal =====
-    function openModal(isEdit = false) {
-      modalTitle.textContent = isEdit ? 'Edit Application' : 'Add Application';
-      document.getElementById('saveBtn').textContent = isEdit ? 'Update' : 'Save';
-      modalBackdrop.classList.add('active');
-      document.getElementById('company').focus();
-    }
+        async function getLocalById(id) {
+            const db = await openIDB();
+            return new Promise((resolve, reject) => {
+                const tx = db.transaction('applications', 'readonly');
+                const store = tx.objectStore('applications');
+                const request = store.get(id);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+        }
 
-    function closeModal() {
-      modalBackdrop.classList.remove('active');
-      appForm.reset();
-      editingId = null;
-    }
+        function getPendingChanges() {
+            return JSON.parse(localStorage.getItem(PENDING_KEY) || '[]');
+        }
 
-    // ===== CRUD =====
-    function addApplication(data) {
-      const app = {
-        id: generateId(),
-        company: data.company.trim(),
-        position: data.position.trim(),
-        status: data.status,
-        appliedDate: data.appliedDate || null,
-        url: data.url.trim() || null,
-        notes: data.notes.trim() || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      applications.unshift(app);
-      saveApplications();
-      render();
-      showToast('Application added');
-    }
+        function addPendingChange(appId) {
+            const pending = getPendingChanges();
+            if (!pending.includes(appId)) {
+                pending.push(appId);
+                localStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+            }
+            updateSyncIndicator();
+        }
 
-    function updateApplication(id, data) {
-      const index = applications.findIndex(app => app.id === id);
-      if (index === -1) return;
-      
-      applications[index] = {
-        ...applications[index],
-        company: data.company.trim(),
-        position: data.position.trim(),
-        status: data.status,
-        appliedDate: data.appliedDate || null,
-        url: data.url.trim() || null,
-        notes: data.notes.trim() || null,
-        updatedAt: new Date().toISOString()
-      };
-      saveApplications();
-      render();
-      showToast('Application updated');
-    }
+        function clearPendingChanges() {
+            localStorage.setItem(PENDING_KEY, '[]');
+            updateSyncIndicator();
+        }
 
-    function deleteApp(id) {
-      const index = applications.findIndex(app => app.id === id);
-      if (index === -1) return;
-      
-      deletedApp = { ...applications[index], index };
-      applications.splice(index, 1);
-      saveApplications();
-      render();
-      showToast('Application deleted', true);
-    }
+        function updateSyncIndicator() {
+            const pending = getPendingChanges();
+            if (statusIndicator) {
+                if (!navigator.onLine) {
+                    statusIndicator.textContent = '🔴 Offline';
+                } else if (pending.length > 0) {
+                    statusIndicator.textContent = `🟡 ${pending.length} pending`;
+                } else {
+                    statusIndicator.textContent = '🟢 Synced';
+                }
+            }
+        }
 
-    function undoDelete() {
-      if (!deletedApp) return;
-      applications.splice(deletedApp.index, 0, deletedApp);
-      delete deletedApp.index;
-      deletedApp = null;
-      saveApplications();
-      render();
-      hideToast();
-      showToast('Deletion undone');
-    }
+        async function syncToCloud() {
+            if (!navigator.onLine || !getToken()) return;
+            const pending = getPendingChanges();
+            if (pending.length === 0) return;
 
-    function editApp(id) {
-      const app = applications.find(a => a.id === id);
-      if (!app) return;
-      
-      editingId = id;
-      document.getElementById('company').value = app.company;
-      document.getElementById('position').value = app.position;
-      document.getElementById('status').value = app.status;
-      document.getElementById('appliedDate').value = app.appliedDate || '';
-      document.getElementById('url').value = app.url || '';
-      document.getElementById('notes').value = app.notes || '';
-      openModal(true);
-    }
+            try {
+                const changes = [];
+                for (const id of pending) {
+                    const app = await getLocalById(id);
+                    if (app) changes.push(app);
+                }
 
-    // ===== Toast =====
-    function showToast(message, showUndo = false) {
-      clearTimeout(toastTimeout);
-      toastMessage.textContent = message;
-      toastUndo.style.display = showUndo ? 'inline-block' : 'none';
-      toast.classList.add('visible');
-      toastTimeout = setTimeout(hideToast, showUndo ? 5000 : 2500);
-    }
+                const lastSync = localStorage.getItem(SYNC_KEY) || '1970-01-01T00:00:00.000Z';
+                const res = await fetch(`${API_BASE}/sync`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` },
+                    body: JSON.stringify({ changes, lastSync })
+                });
 
-    function hideToast() {
-      toast.classList.remove('visible');
-      deletedApp = null;
-    }
+                if (res.ok) {
+                    const { applications: serverApps, serverTime } = await res.json();
+                    // Merge server changes
+                    for (const app of serverApps) {
+                        const local = await getLocalById(app.id);
+                        if (!local || app.updatedAt > local.updatedAt) {
+                            await saveLocal(app);
+                        }
+                    }
+                    localStorage.setItem(SYNC_KEY, serverTime);
+                    clearPendingChanges();
+                    applications = await getAllLocal();
+                    render();
+                }
+            } catch (err) {
+                console.error('Sync error:', err);
+            }
+            updateSyncIndicator();
+        }
 
-    // ===== Event Listeners =====
-    document.getElementById('addBtn').addEventListener('click', () => openModal());
-    document.getElementById('addBtnEmpty').addEventListener('click', () => openModal());
-    document.getElementById('closeModal').addEventListener('click', closeModal);
-    document.getElementById('cancelBtn').addEventListener('click', closeModal);
-    
-    modalBackdrop.addEventListener('click', (e) => {
-      if (e.target === modalBackdrop) closeModal();
-    });
+        async function syncFromCloud() {
+            if (!navigator.onLine || !getToken()) return;
+            try {
+                const lastSync = localStorage.getItem(SYNC_KEY) || '1970-01-01T00:00:00.000Z';
+                const res = await fetch(`${API_BASE}/sync?since=${encodeURIComponent(lastSync)}`, {
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                });
+                if (res.ok) {
+                    const { applications: serverApps, serverTime } = await res.json();
+                    for (const app of serverApps) {
+                        const local = await getLocalById(app.id);
+                        if (!local || app.updatedAt > local.updatedAt) {
+                            await saveLocal(app);
+                        }
+                    }
+                    localStorage.setItem(SYNC_KEY, serverTime);
+                    applications = await getAllLocal();
+                    render();
+                }
+            } catch (err) {
+                console.error('Sync from cloud error:', err);
+            }
+            updateSyncIndicator();
+        }
 
-    appForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const formData = new FormData(appForm);
-      const data = Object.fromEntries(formData);
-      
-      if (editingId) {
-        updateApplication(editingId, data);
-      } else {
-        addApplication(data);
-      }
-      closeModal();
-    });
+        // Auto-sync when coming online
+        window.addEventListener('online', () => {
+            updateConnectionStatus();
+            syncToCloud();
+        });
 
-    filterStatus.addEventListener('change', render);
-    sortBy.addEventListener('change', render);
-    toastUndo.addEventListener('click', undoDelete);
+        // Periodic sync every 30 seconds when online
+        setInterval(() => { if (navigator.onLine && getToken()) syncToCloud(); }, 30000);
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalBackdrop.classList.contains('active')) {
-        closeModal();
-      }
-    });
+        const API_BASE = window.location.origin + '/api';
+        const TOKEN_KEY = 'job_tracker_token';
+        let applications = [], editingId = null, deletedApp = null, toastTimeout = null, isLoginMode = true;
 
-    // ===== Initialize =====
-    loadApplications();
-    render();
-  </script>
+        const authView = document.getElementById('authView'), appView = document.getElementById('appView');
+        const authForm = document.getElementById('authForm'), authError = document.getElementById('authError');
+        const authUsername = document.getElementById('authUsername'), authSubmit = document.getElementById('authSubmit');
+        const loginTab = document.getElementById('loginTab'), registerTab = document.getElementById('registerTab');
+        const pinInputs = document.querySelectorAll('.pin-input');
+        const appList = document.getElementById('appList'), statsBar = document.getElementById('statsBar');
+        const emptyState = document.getElementById('emptyState'), loading = document.getElementById('loading');
+        const modalBackdrop = document.getElementById('modalBackdrop'), modalTitle = document.getElementById('modalTitle');
+        const appForm = document.getElementById('appForm'), filterStatus = document.getElementById('filterStatus');
+        const sortBy = document.getElementById('sortBy'), toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage'), toastUndo = document.getElementById('toastUndo');
+
+        pinInputs.forEach((input, idx) => {
+            input.addEventListener('input', (e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                e.target.value = val;
+                if (val && idx < 3) pinInputs[idx + 1].focus();
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && idx > 0) pinInputs[idx - 1].focus();
+            });
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const paste = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 4);
+                paste.split('').forEach((d, i) => { if (pinInputs[i]) pinInputs[i].value = d; });
+                if (paste.length === 4) pinInputs[3].focus();
+            });
+        });
+
+        function getPin() { return Array.from(pinInputs).map(i => i.value).join(''); }
+        function clearPin() { pinInputs.forEach(i => i.value = ''); pinInputs[0].focus(); }
+        function getToken() { return localStorage.getItem(TOKEN_KEY); }
+        function setToken(t) { localStorage.setItem(TOKEN_KEY, t); }
+        function clearToken() { localStorage.removeItem(TOKEN_KEY); }
+
+        function showAuthError(msg) { authError.textContent = msg; authError.classList.add('visible'); }
+        function hideAuthError() { authError.classList.remove('visible'); }
+        function switchToLogin() { isLoginMode = true; loginTab.classList.add('active'); registerTab.classList.remove('active'); authSubmit.textContent = 'Sign In'; hideAuthError(); }
+        function switchToRegister() { isLoginMode = false; registerTab.classList.add('active'); loginTab.classList.remove('active'); authSubmit.textContent = 'Create Account'; hideAuthError(); }
+        loginTab.addEventListener('click', switchToLogin);
+        registerTab.addEventListener('click', switchToRegister);
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAuthError();
+            const username = authUsername.value.trim();
+            const pin = getPin();
+            if (pin.length !== 4) { showAuthError('Please enter your 4-digit PIN'); return; }
+            try {
+                const action = isLoginMode ? 'login' : 'register';
+                const res = await fetch(`${API_BASE}/auth`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, pin, action }) });
+                const text = await res.text();
+                let data = {};
+                try { data = text ? JSON.parse(text) : {}; } catch { data = { error: 'Server error' }; }
+                if (!res.ok) throw new Error(data.error || `Server returned ${res.status}`);
+                if (!data.token) throw new Error('No token received');
+                setToken(data.token);
+                showApp();
+            } catch (err) { showAuthError(err.message || 'Connection failed'); clearPin(); }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => { clearToken(); applications = []; showAuth(); });
+        function showAuth() { authView.classList.remove('hidden'); appView.classList.add('hidden'); authForm.reset(); clearPin(); hideAuthError(); }
+        function showApp() { authView.classList.add('hidden'); appView.classList.remove('hidden'); fetchApplications(); }
+
+        async function apiRequest(endpoint, options = {}) {
+            const token = getToken();
+            const res = await fetch(`${API_BASE}${endpoint}`, { headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, ...options });
+            if (res.status === 401) { clearToken(); showAuth(); throw new Error('Session expired'); }
+            if (!res.ok) { const data = await res.json(); throw new Error(data.error || 'Request failed'); }
+            return res.json();
+        }
+
+        async function fetchApplications() {
+            loading.classList.remove('hidden');
+            try {
+                applications = await getAllLocal();
+                render();
+                // Also sync from cloud in background
+                syncFromCloud();
+            } catch (err) {
+                console.error('Fetch error:', err);
+                applications = [];
+            }
+            loading.classList.add('hidden');
+            updateSyncIndicator();
+        }
+        function generateId() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); }); }
+
+        function render() { renderStats(); renderList(); }
+        function renderStats() {
+            const counts = { wishlist: 0, applied: 0, interview: 0, offer: 0, accepted: 0, rejected: 0 };
+            applications.forEach(app => counts[app.status]++);
+            statsBar.innerHTML = Object.entries(counts).filter(([_, c]) => c > 0).map(([s, c]) => `<div class="stat"><span class="stat-dot dot-${s}"></span><span class="stat-count">${c}</span><span class="stat-label">${s}</span></div>`).join('');
+        }
+        function renderList() {
+            const filter = filterStatus.value, sort = sortBy.value;
+            let filtered = filter === 'all' ? [...applications] : applications.filter(a => a.status === filter);
+            filtered.sort((a, b) => sort === 'newest' ? new Date(b.createdAt) - new Date(a.createdAt) : sort === 'oldest' ? new Date(a.createdAt) - new Date(b.createdAt) : a.company.localeCompare(b.company));
+            if (!filtered.length) { appList.innerHTML = ''; emptyState.classList.remove('hidden'); return; }
+            emptyState.classList.add('hidden');
+            appList.innerHTML = filtered.map(app => `<div class="app-card" data-id="${app.id}"><div class="app-card-main"><div class="app-company">${escapeHtml(app.company)}</div><div class="app-position">${escapeHtml(app.position)}</div><div class="app-meta"><span class="app-status status-${app.status}">${app.status}</span>${app.appliedDate ? `<span class="app-meta-item">${formatDate(app.appliedDate)}</span>` : ''}${app.url ? `<a href="${escapeHtml(app.url)}" target="_blank" rel="noopener">View posting →</a>` : ''}</div>${app.notes ? `<div class="app-notes">${escapeHtml(app.notes)}</div>` : ''}</div><div class="app-card-actions"><button class="btn btn-icon" onclick="editApp('${app.id}')" aria-label="Edit">✏️</button><button class="btn btn-icon" onclick="deleteApp('${app.id}')" aria-label="Delete">🗑️</button></div></div>`).join('');
+        }
+        function escapeHtml(s) { return s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : ''; }
+        function formatDate(d) { try { return new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); } catch { return d; } }
+
+        function openModal(isEdit = false) { modalTitle.textContent = isEdit ? 'Edit Application' : 'Add Application'; document.getElementById('saveBtn').textContent = isEdit ? 'Save Changes' : 'Save Application'; modalBackdrop.classList.add('active'); document.getElementById('company').focus(); }
+        function closeModal() { modalBackdrop.classList.remove('active'); appForm.reset(); editingId = null; }
+
+        // Local-first CRUD functions
+        async function addApplication(data) {
+            const app = { id: generateId(), company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+            await saveLocal(app);
+            addPendingChange(app.id);
+            applications.unshift(app);
+            render();
+            showToast('Application added');
+            syncToCloud(); // Try to sync immediately
+        }
+        async function updateApplication(id, data) {
+            const existing = await getLocalById(id);
+            if (!existing) return;
+            const updated = { ...existing, company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, updatedAt: new Date().toISOString() };
+            await saveLocal(updated);
+            addPendingChange(id);
+            const idx = applications.findIndex(a => a.id === id);
+            if (idx !== -1) applications[idx] = updated;
+            render();
+            showToast('Changes saved');
+            syncToCloud();
+        }
+        async function deleteApp(id) {
+            const idx = applications.findIndex(a => a.id === id);
+            if (idx === -1) return;
+            deletedApp = { ...applications[idx], index: idx };
+            await deleteLocal(id);
+            addPendingChange(id);
+            applications.splice(idx, 1);
+            render();
+            showToast('Application deleted', true);
+            syncToCloud();
+        }
+        async function undoDelete() {
+            if (!deletedApp) return;
+            const restored = { ...deletedApp, deletedAt: null, updatedAt: new Date().toISOString() };
+            delete restored.index;
+            await saveLocal(restored);
+            addPendingChange(restored.id);
+            applications.splice(deletedApp.index, 0, restored);
+            deletedApp = null;
+            hideToast();
+            render();
+            showToast('Restored');
+            syncToCloud();
+        }
+        function editApp(id) {
+            const app = applications.find(a => a.id === id); if (!app) return;
+            editingId = id;
+            document.getElementById('company').value = app.company;
+            document.getElementById('position').value = app.position;
+            document.getElementById('status').value = app.status;
+            document.getElementById('appliedDate').value = app.appliedDate || '';
+            document.getElementById('url').value = app.url || '';
+            document.getElementById('notes').value = app.notes || '';
+            openModal(true);
+        }
+
+        function showToast(msg, showUndo = false, isError = false) { clearTimeout(toastTimeout); toastMessage.textContent = msg; toastUndo.style.display = showUndo ? 'inline-block' : 'none'; toast.classList.toggle('error', isError); toast.classList.add('visible'); toastTimeout = setTimeout(hideToast, showUndo ? 5000 : 2500); }
+        function hideToast() { toast.classList.remove('visible'); if (!toastUndo.style.display || toastUndo.style.display === 'none') deletedApp = null; }
+
+        // ===== Export to CSV =====
+        function exportToCSV() {
+            if (!applications.length) { showToast('No applications to export', false, true); return; }
+            const headers = ['Company', 'Position', 'Status', 'Date Applied', 'URL', 'Notes', 'Created At'];
+            const escapeCSV = (val) => {
+                if (val == null) return '';
+                const str = String(val);
+                if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+                    return '"' + str.replace(/"/g, '""') + '"';
+                }
+                return str;
+            };
+            const rows = applications.map(app => [
+                escapeCSV(app.company),
+                escapeCSV(app.position),
+                escapeCSV(app.status),
+                escapeCSV(app.appliedDate),
+                escapeCSV(app.url),
+                escapeCSV(app.notes),
+                escapeCSV(app.createdAt)
+            ].join(','));
+            const csv = [headers.join(','), ...rows].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `job-applications-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast(`Exported ${applications.length} applications`);
+        }
+        document.getElementById('exportBtn').addEventListener('click', exportToCSV);
+
+        document.getElementById('addBtn').addEventListener('click', () => openModal());
+        document.getElementById('addBtnEmpty').addEventListener('click', () => openModal());
+        document.getElementById('closeModal').addEventListener('click', closeModal);
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
+        modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
+        appForm.addEventListener('submit', async (e) => { e.preventDefault(); const data = Object.fromEntries(new FormData(appForm)); if (editingId) await updateApplication(editingId, data); else await addApplication(data); closeModal(); });
+        filterStatus.addEventListener('change', render);
+        sortBy.addEventListener('change', render);
+        toastUndo.addEventListener('click', undoDelete);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && modalBackdrop.classList.contains('active')) closeModal(); });
+
+        if (getToken()) showApp(); else showAuth();
+    </script>
 </body>
+
 </html>
