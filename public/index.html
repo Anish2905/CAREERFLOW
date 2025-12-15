@@ -2137,7 +2137,7 @@
             reader.onload = async () => {
                 const resume = {
                     id: generateId(),
-                    name: file.name, // Use full filename as name
+                    name: file.name,
                     fileName: file.name,
                     fileData: reader.result,
                     fileType: file.type,
@@ -2145,12 +2145,25 @@
                     updatedAt: new Date().toISOString()
                 };
                 await saveResume(resume);
-                await syncResumeToCloud(resume); // Sync to cloud
-                await populateResumeDropdown(resume.id);
-                showToast(`Resume "${file.name}" synced`);
+                await syncResumeToCloud(resume);
+
+                // Auto-link and show the uploaded resume
+                document.getElementById('resumeIdHidden').value = resume.id;
+                await showResumeSection(resume.id);
+
+                showToast(`Resume "${file.name}" uploaded & linked`);
                 resumeUpload.value = '';
             };
             reader.readAsDataURL(file);
+        });
+
+        // Also link when selecting from dropdown
+        resumeIdSelect.addEventListener('change', async (e) => {
+            const selectedId = e.target.value;
+            if (selectedId) {
+                document.getElementById('resumeIdHidden').value = selectedId;
+                await showResumeSection(selectedId);
+            }
         });
 
         // Sync resumes when app loads
