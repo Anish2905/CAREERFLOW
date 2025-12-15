@@ -1056,51 +1056,6 @@
             top: 0;
         }
 
-        /* Quick Status Edit Dropdown */
-        .status-badge {
-            cursor: pointer;
-            transition: transform var(--transition-fast);
-        }
-
-        .status-badge:hover {
-            transform: scale(1.05);
-        }
-
-        .status-dropdown {
-            position: absolute;
-            top: calc(100% + var(--space-2));
-            left: 0;
-            background: var(--color-surface);
-            border: 1px solid var(--color-border);
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-modal);
-            padding: var(--space-2);
-            z-index: 100;
-            min-width: 140px;
-            display: none;
-        }
-
-        [data-theme="dark"] .status-dropdown {
-            border-color: var(--color-border-hover);
-        }
-
-        .status-dropdown.active {
-            display: block;
-            animation: fadeInUp 0.15s ease-out;
-        }
-
-        .status-option {
-            padding: var(--space-2) var(--space-3);
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            font-size: var(--font-size-sm);
-            transition: background var(--transition-fast);
-        }
-
-        .status-option:hover {
-            background: var(--color-bg);
-        }
-
         .hidden {
             display: none !important;
         }
@@ -1674,19 +1629,13 @@
             filtered.sort((a, b) => sort === 'newest' ? new Date(b.createdAt) - new Date(a.createdAt) : sort === 'oldest' ? new Date(a.createdAt) - new Date(b.createdAt) : a.company.localeCompare(b.company));
             if (!filtered.length) { appList.innerHTML = ''; emptyState.classList.remove('hidden'); return; }
             emptyState.classList.add('hidden');
-            const statuses = ['wishlist', 'applied', 'interview', 'offer', 'accepted', 'rejected'];
             appList.innerHTML = filtered.map(app => `
                 <div class="app-card ${app.status === 'interview' ? 'interview-highlight' : ''}" data-id="${app.id}">
                     <div class="app-card-main">
                         <div class="app-company">${escapeHtml(app.company)}</div>
                         <div class="app-position">${escapeHtml(app.position)}</div>
-                        <div class="app-card-meta" style="position: relative;">
-                            <span class="app-status status-${app.status} status-badge" onclick="event.stopPropagation(); this.nextElementSibling.classList.toggle('active');">
-                                ${app.status}
-                            </span>
-                            <div class="status-dropdown">
-                                ${statuses.map(s => `<div class="status-option status-${s}" onclick="event.stopPropagation(); quickStatusChange('${app.id}', '${s}');">${s}</div>`).join('')}
-                            </div>
+                        <div class="app-meta">
+                            <span class="app-status status-${app.status}">${app.status}</span>
                             ${app.appliedDate ? `<span class="app-meta-item">${formatDate(app.appliedDate)}</span>` : ''}
                             ${app.url ? `<a href="${escapeHtml(app.url)}" target="_blank" rel="noopener">View posting →</a>` : ''}
                         </div>
@@ -1875,27 +1824,6 @@
             pullIndicator.classList.remove('visible');
             touchStartY = 0;
             isPulling = false;
-        });
-
-        // ===== Quick Status Edit =====
-        async function quickStatusChange(id, newStatus) {
-            const existing = await getLocalById(id);
-            if (!existing) return;
-            const updated = { ...existing, status: newStatus, updatedAt: new Date().toISOString() };
-            await saveLocal(updated);
-            addPendingChange(id);
-            const idx = applications.findIndex(a => a.id === id);
-            if (idx !== -1) applications[idx] = updated;
-            render();
-            showToast(`Status → ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`);
-            syncToCloud();
-        }
-
-        // Close status dropdowns when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.app-card-meta')) {
-                document.querySelectorAll('.status-dropdown.active').forEach(d => d.classList.remove('active'));
-            }
         });
     </script>
 </body>
