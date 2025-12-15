@@ -4,29 +4,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Applicant Tracker</title>
+    <title>Job Tracker</title>
     <meta name="description" content="Track your job applications, interviews, and offers in one place.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ===== Design Tokens (following rules) ===== */
         :root {
-            --color-primary-h: 220;
-            --color-primary-s: 70%;
-            --color-primary-l: 50%;
-            --color-primary: hsl(var(--color-primary-h), var(--color-primary-s), var(--color-primary-l));
-            --color-primary-hover: hsl(var(--color-primary-h), var(--color-primary-s), 40%);
-            --color-bg: hsl(220, 15%, 97%);
+            /* HSL Color Palette - Primary */
+            --hue-primary: 250;
+            --color-primary: hsl(var(--hue-primary), 85%, 60%);
+            --color-primary-hover: hsl(var(--hue-primary), 85%, 50%);
+            --color-primary-light: hsl(var(--hue-primary), 85%, 95%);
+
+            /* Background & Surface */
+            --color-bg: hsl(240, 20%, 98%);
             --color-surface: hsl(0, 0%, 100%);
-            --color-text: hsl(220, 20%, 15%);
-            --color-text-secondary: hsl(220, 10%, 45%);
-            --color-border: hsl(220, 15%, 88%);
-            --color-wishlist: hsl(200, 70%, 50%);
-            --color-applied: hsl(280, 60%, 55%);
-            --color-interview: hsl(40, 90%, 50%);
-            --color-offer: hsl(150, 60%, 45%);
-            --color-accepted: hsl(140, 70%, 40%);
-            --color-rejected: hsl(0, 65%, 55%);
-            --shadow-button: 0 1px 2px hsla(220, 20%, 15%, 0.15);
-            --shadow-card: 0 4px 8px hsla(220, 20%, 15%, 0.1);
-            --shadow-modal: 0 12px 24px hsla(220, 20%, 15%, 0.2);
+            --color-surface-elevated: hsl(0, 0%, 100%);
+
+            /* Text - using weight for hierarchy, not just size */
+            --color-text: hsl(240, 25%, 12%);
+            --color-text-secondary: hsl(240, 10%, 50%);
+            --color-text-tertiary: hsl(240, 8%, 65%);
+
+            --color-border: hsl(240, 15%, 90%);
+            --color-border-hover: hsl(240, 15%, 80%);
+
+            /* Status Colors (HSL) - vibrant but balanced */
+            --color-wishlist: hsl(200, 80%, 55%);
+            --color-applied: hsl(270, 70%, 60%);
+            --color-interview: hsl(35, 95%, 55%);
+            --color-offer: hsl(155, 65%, 45%);
+            --color-accepted: hsl(145, 75%, 38%);
+            --color-rejected: hsl(0, 70%, 58%);
+
+            /* Shadow Elevation System (per rules: button 1/2, card 4/8, modal 12/24) */
+            --shadow-button: 0 1px 2px hsla(240, 25%, 12%, 0.08);
+            --shadow-card: 0 4px 8px hsla(240, 25%, 12%, 0.06), 0 1px 3px hsla(240, 25%, 12%, 0.08);
+            --shadow-card-hover: 0 8px 16px hsla(240, 25%, 12%, 0.1), 0 2px 4px hsla(240, 25%, 12%, 0.08);
+            --shadow-modal: 0 12px 24px hsla(240, 25%, 12%, 0.15), 0 4px 8px hsla(240, 25%, 12%, 0.1);
+
+            /* Spacing Scale (from rules: 4,8,12,16,24,32,48,64) */
             --space-1: 4px;
             --space-2: 8px;
             --space-3: 12px;
@@ -34,11 +53,34 @@
             --space-5: 24px;
             --space-6: 32px;
             --space-7: 48px;
-            --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            --line-height-body: 1.5;
-            --line-height-heading: 1.2;
+            --space-8: 64px;
+
+            /* Typography - Inter for premium feel */
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-size-xs: 12px;
+            --font-size-sm: 14px;
+            --font-size-base: 15px;
+            --font-size-lg: 18px;
+            --font-size-xl: 24px;
+            --font-size-2xl: 32px;
+
+            /* Line height (per rules: 1.5-1.7 for <16px, 1.1-1.25 for >24px) */
+            --line-height-tight: 1.2;
+            --line-height-base: 1.5;
+            --line-height-relaxed: 1.6;
+
+            /* Border radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.2s ease;
         }
 
+        /* ===== Reset ===== */
         *,
         *::before,
         *::after {
@@ -49,33 +91,39 @@
 
         body {
             font-family: var(--font-family);
+            font-size: var(--font-size-base);
             background: var(--color-bg);
             color: var(--color-text);
-            line-height: var(--line-height-body);
+            line-height: var(--line-height-base);
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* ===== Layout ===== */
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
-            padding: var(--space-4);
+            padding: var(--space-5);
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: var(--space-5);
-            flex-wrap: wrap;
-            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+            padding-bottom: var(--space-5);
+            border-bottom: 1px solid var(--color-border);
         }
 
         h1 {
-            font-size: 24px;
-            line-height: var(--line-heading);
-            font-weight: 600;
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            line-height: var(--line-height-tight);
+            letter-spacing: -0.02em;
+            color: var(--color-text);
         }
 
+        /* ===== Buttons (min 44px touch target per rules) ===== */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -83,22 +131,23 @@
             gap: var(--space-2);
             min-height: 44px;
             min-width: 44px;
-            padding: var(--space-2) var(--space-4);
+            padding: var(--space-3) var(--space-5);
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: var(--font-size-sm);
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.15s, transform 0.1s;
+            transition: all var(--transition-fast);
             box-shadow: var(--shadow-button);
         }
 
         .btn:active {
-            transform: scale(0.98);
+            transform: scale(0.97);
         }
 
         .btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
         }
 
@@ -109,6 +158,8 @@
 
         .btn-primary:hover:not(:disabled) {
             background: var(--color-primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px hsla(var(--hue-primary), 85%, 50%, 0.35);
         }
 
         .btn-secondary {
@@ -119,44 +170,76 @@
 
         .btn-secondary:hover:not(:disabled) {
             background: var(--color-bg);
+            border-color: var(--color-border-hover);
         }
 
         .btn-icon {
             padding: var(--space-2);
             background: transparent;
             box-shadow: none;
+            color: var(--color-text-tertiary);
+            border-radius: var(--radius-sm);
         }
 
         .btn-icon:hover:not(:disabled) {
-            background: var(--color-bg);
+            background: var(--color-primary-light);
+            color: var(--color-primary);
         }
 
+        /* ===== Auth Page ===== */
         .auth-container {
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            padding: var(--space-4);
+            padding: var(--space-5);
+            background: linear-gradient(135deg, hsl(var(--hue-primary), 85%, 97%) 0%, hsl(200, 80%, 97%) 100%);
         }
 
         .auth-card {
             width: 100%;
-            max-width: 360px;
+            max-width: 380px;
             background: var(--color-surface);
-            border-radius: 16px;
-            box-shadow: var(--shadow-card);
-            padding: var(--space-6);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-modal);
+            padding: var(--space-7);
         }
 
-        .auth-card h1 {
+        .auth-logo {
             text-align: center;
-            margin-bottom: var(--space-5);
+            margin-bottom: var(--space-6);
+        }
+
+        .auth-logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--color-primary) 0%, hsl(280, 80%, 60%) 100%);
+            border-radius: var(--radius-lg);
+            font-size: 28px;
+            margin-bottom: var(--space-3);
+            box-shadow: 0 8px 24px hsla(var(--hue-primary), 85%, 50%, 0.3);
+        }
+
+        .auth-logo h1 {
+            font-size: var(--font-size-lg);
+            font-weight: 700;
+        }
+
+        .auth-logo p {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            margin-top: var(--space-1);
         }
 
         .auth-tabs {
             display: flex;
+            background: var(--color-bg);
+            border-radius: var(--radius-sm);
+            padding: var(--space-1);
             margin-bottom: var(--space-5);
-            border-bottom: 1px solid var(--color-border);
         }
 
         .auth-tab {
@@ -164,55 +247,74 @@
             padding: var(--space-3);
             background: transparent;
             border: none;
-            font-size: 14px;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: var(--font-size-sm);
             font-weight: 500;
             cursor: pointer;
             color: var(--color-text-secondary);
-            border-bottom: 2px solid transparent;
-            margin-bottom: -1px;
+            transition: all var(--transition-fast);
         }
 
         .auth-tab.active {
-            color: var(--color-primary);
-            border-bottom-color: var(--color-primary);
+            background: var(--color-surface);
+            color: var(--color-text);
+            box-shadow: var(--shadow-button);
         }
 
         .auth-error {
-            background: hsla(0, 65%, 55%, 0.1);
-            color: hsl(0, 65%, 45%);
-            padding: var(--space-3);
-            border-radius: 8px;
+            background: hsl(0, 80%, 96%);
+            color: hsl(0, 70%, 45%);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-sm);
             margin-bottom: var(--space-4);
-            font-size: 14px;
+            font-size: var(--font-size-sm);
             display: none;
+            border-left: 3px solid hsl(0, 70%, 55%);
         }
 
         .auth-error.visible {
             display: block;
         }
 
+        /* ===== PIN Input ===== */
+        .pin-label {
+            display: block;
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            margin-bottom: var(--space-3);
+            color: var(--color-text);
+        }
+
         .pin-input-group {
             display: flex;
             justify-content: center;
-            gap: var(--space-2);
-            margin: var(--space-4) 0;
+            gap: var(--space-3);
+            margin-bottom: var(--space-5);
         }
 
         .pin-input {
-            width: 48px;
-            height: 56px;
+            width: 52px;
+            height: 60px;
             text-align: center;
-            font-size: 24px;
+            font-family: inherit;
+            font-size: var(--font-size-xl);
             font-weight: 600;
+            color: var(--color-text);
             border: 2px solid var(--color-border);
-            border-radius: 8px;
+            border-radius: var(--radius-md);
+            background: var(--color-bg);
+            transition: all var(--transition-fast);
         }
 
         .pin-input:focus {
             outline: none;
             border-color: var(--color-primary);
+            background: var(--color-surface);
+            box-shadow: 0 0 0 4px hsla(var(--hue-primary), 85%, 60%, 0.15);
         }
 
+        /* ===== Stats Bar ===== */
         .stats-bar {
             display: flex;
             gap: var(--space-2);
@@ -224,28 +326,39 @@
             display: flex;
             align-items: center;
             gap: var(--space-2);
-            padding: var(--space-2) var(--space-3);
+            padding: var(--space-2) var(--space-4);
             background: var(--color-surface);
-            border-radius: 8px;
-            font-size: 13px;
+            border-radius: 100px;
+            font-size: var(--font-size-sm);
             box-shadow: var(--shadow-button);
+            transition: transform var(--transition-fast);
+        }
+
+        .stat:hover {
+            transform: translateY(-1px);
         }
 
         .stat-dot {
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
         }
 
         .stat-count {
             font-weight: 600;
+            color: var(--color-text);
         }
 
+        .stat-label {
+            color: var(--color-text-secondary);
+            text-transform: capitalize;
+        }
+
+        /* ===== Controls ===== */
         .controls {
             display: flex;
             gap: var(--space-3);
-            margin-bottom: var(--space-4);
-            flex-wrap: wrap;
+            margin-bottom: var(--space-5);
         }
 
         .select-wrap {
@@ -255,12 +368,19 @@
         select {
             appearance: none;
             min-height: 44px;
-            padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3);
+            padding: var(--space-3) var(--space-7) var(--space-3) var(--space-4);
             border: 1px solid var(--color-border);
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             background: var(--color-surface);
-            font-size: 14px;
+            font-family: inherit;
+            font-size: var(--font-size-sm);
+            color: var(--color-text);
             cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        select:hover {
+            border-color: var(--color-border-hover);
         }
 
         select:focus {
@@ -269,16 +389,20 @@
         }
 
         .select-wrap::after {
-            content: '▼';
+            content: '';
             position: absolute;
-            right: 12px;
+            right: 16px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 10px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--color-text-tertiary);
             pointer-events: none;
-            color: var(--color-text-secondary);
         }
 
+        /* ===== Application Cards ===== */
         .app-list {
             display: flex;
             flex-direction: column;
@@ -288,84 +412,124 @@
         .app-card {
             display: grid;
             grid-template-columns: 1fr auto;
-            gap: var(--space-3);
-            padding: var(--space-4);
+            gap: var(--space-4);
+            padding: var(--space-5);
             background: var(--color-surface);
-            border-radius: 12px;
+            border-radius: var(--radius-md);
             box-shadow: var(--shadow-card);
+            transition: all var(--transition-base);
+            border: 1px solid transparent;
+        }
+
+        .app-card:hover {
+            box-shadow: var(--shadow-card-hover);
+            transform: translateY(-2px);
+            border-color: var(--color-border);
         }
 
         .app-card-main {
             display: flex;
             flex-direction: column;
-            gap: var(--space-1);
+            gap: var(--space-2);
         }
 
         .app-company {
-            font-size: 16px;
+            font-size: var(--font-size-lg);
             font-weight: 600;
-            line-height: var(--line-height-heading);
+            line-height: var(--line-height-tight);
+            color: var(--color-text);
         }
 
         .app-position {
+            font-size: var(--font-size-sm);
             color: var(--color-text-secondary);
-            font-size: 14px;
+            font-weight: 400;
         }
 
         .app-meta {
             display: flex;
             align-items: center;
-            gap: var(--space-3);
+            gap: var(--space-4);
             margin-top: var(--space-2);
-            font-size: 13px;
-            color: var(--color-text-secondary);
+            font-size: var(--font-size-xs);
         }
 
         .app-status {
             display: inline-flex;
             align-items: center;
-            gap: var(--space-1);
-            padding: var(--space-1) var(--space-2);
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
+            gap: 6px;
+            padding: 6px var(--space-3);
+            border-radius: 100px;
+            font-size: var(--font-size-xs);
+            font-weight: 600;
             text-transform: capitalize;
+            letter-spacing: 0.02em;
+        }
+
+        .app-meta-item {
+            color: var(--color-text-tertiary);
+        }
+
+        .app-meta a {
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .app-meta a:hover {
+            text-decoration: underline;
+        }
+
+        .app-notes {
+            margin-top: var(--space-3);
+            padding-top: var(--space-3);
+            border-top: 1px solid var(--color-border);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-secondary);
+            line-height: var(--line-height-relaxed);
         }
 
         .app-card-actions {
             display: flex;
             gap: var(--space-1);
             align-items: flex-start;
+            opacity: 0.5;
+            transition: opacity var(--transition-fast);
         }
 
+        .app-card:hover .app-card-actions {
+            opacity: 1;
+        }
+
+        /* Status Badge Colors - using tints of status color (per rule: no grey on colored bg) */
         .status-wishlist {
-            background: hsla(200, 70%, 50%, 0.15);
-            color: hsl(200, 70%, 35%);
+            background: hsl(200, 80%, 93%);
+            color: hsl(200, 80%, 35%);
         }
 
         .status-applied {
-            background: hsla(280, 60%, 55%, 0.15);
-            color: hsl(280, 60%, 40%);
+            background: hsl(270, 70%, 93%);
+            color: hsl(270, 70%, 40%);
         }
 
         .status-interview {
-            background: hsla(40, 90%, 50%, 0.15);
-            color: hsl(40, 90%, 35%);
+            background: hsl(35, 95%, 90%);
+            color: hsl(35, 95%, 30%);
         }
 
         .status-offer {
-            background: hsla(150, 60%, 45%, 0.15);
-            color: hsl(150, 60%, 30%);
+            background: hsl(155, 65%, 90%);
+            color: hsl(155, 65%, 28%);
         }
 
         .status-accepted {
-            background: hsla(140, 70%, 40%, 0.15);
-            color: hsl(140, 70%, 25%);
+            background: hsl(145, 75%, 90%);
+            color: hsl(145, 75%, 25%);
         }
 
         .status-rejected {
-            background: hsla(0, 65%, 55%, 0.15);
-            color: hsl(0, 65%, 40%);
+            background: hsl(0, 70%, 93%);
+            color: hsl(0, 70%, 40%);
         }
 
         .dot-wishlist {
@@ -392,26 +556,37 @@
             background: var(--color-rejected);
         }
 
+        /* ===== Empty State (per rule: intentional with clear CTA) ===== */
         .empty-state {
             text-align: center;
-            padding: var(--space-7);
-            color: var(--color-text-secondary);
+            padding: var(--space-8) var(--space-5);
+            background: var(--color-surface);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
         }
 
         .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: var(--space-4);
-            opacity: 0.5;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--color-primary-light) 0%, hsl(200, 80%, 95%) 100%);
+            border-radius: var(--radius-lg);
+            font-size: 36px;
+            margin-bottom: var(--space-5);
         }
 
         .empty-state h2 {
-            font-size: 18px;
+            font-size: var(--font-size-lg);
+            font-weight: 600;
             margin-bottom: var(--space-2);
             color: var(--color-text);
         }
 
         .empty-state p {
-            margin-bottom: var(--space-4);
+            color: var(--color-text-secondary);
+            margin-bottom: var(--space-5);
         }
 
         .loading {
@@ -420,15 +595,17 @@
             color: var(--color-text-secondary);
         }
 
+        /* ===== Modal ===== */
         .modal-backdrop {
             display: none;
             position: fixed;
             inset: 0;
-            background: hsla(220, 20%, 15%, 0.5);
+            background: hsla(240, 25%, 12%, 0.6);
+            backdrop-filter: blur(4px);
             z-index: 100;
             align-items: center;
             justify-content: center;
-            padding: var(--space-4);
+            padding: var(--space-5);
         }
 
         .modal-backdrop.active {
@@ -441,7 +618,7 @@
             max-height: 90vh;
             overflow-y: auto;
             background: var(--color-surface);
-            border-radius: 16px;
+            border-radius: var(--radius-xl);
             box-shadow: var(--shadow-modal);
         }
 
@@ -449,36 +626,40 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: var(--space-4);
+            padding: var(--space-5) var(--space-6);
             border-bottom: 1px solid var(--color-border);
         }
 
         .modal-header h2 {
-            font-size: 18px;
-            line-height: var(--line-height-heading);
+            font-size: var(--font-size-lg);
+            font-weight: 600;
         }
 
         .modal-body {
-            padding: var(--space-4);
+            padding: var(--space-6);
         }
 
         .modal-footer {
             display: flex;
             justify-content: flex-end;
-            gap: var(--space-2);
-            padding: var(--space-4);
+            gap: var(--space-3);
+            padding: var(--space-5) var(--space-6);
             border-top: 1px solid var(--color-border);
+            background: var(--color-bg);
+            border-radius: 0 0 var(--radius-xl) var(--radius-xl);
         }
 
+        /* ===== Form ===== */
         .form-group {
-            margin-bottom: var(--space-4);
+            margin-bottom: var(--space-5);
         }
 
         .form-group label {
             display: block;
-            margin-bottom: var(--space-1);
-            font-size: 14px;
+            margin-bottom: var(--space-2);
+            font-size: var(--font-size-sm);
             font-weight: 500;
+            color: var(--color-text);
         }
 
         .form-group input,
@@ -486,46 +667,64 @@
         .form-group textarea {
             width: 100%;
             min-height: 44px;
-            padding: var(--space-2) var(--space-3);
+            padding: var(--space-3) var(--space-4);
             border: 1px solid var(--color-border);
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: var(--radius-sm);
             font-family: inherit;
+            font-size: var(--font-size-sm);
+            color: var(--color-text);
+            background: var(--color-surface);
+            transition: all var(--transition-fast);
         }
 
         .form-group textarea {
-            min-height: 88px;
+            min-height: 100px;
             resize: vertical;
+            line-height: var(--line-height-relaxed);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: var(--color-border-hover);
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
-            outline: 2px solid var(--color-primary);
-            outline-offset: 2px;
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 4px hsla(var(--hue-primary), 85%, 60%, 0.15);
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--color-text-tertiary);
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: var(--space-3);
+            gap: var(--space-4);
         }
 
+        /* ===== Toast (immediate feedback per rules) ===== */
         .toast {
             position: fixed;
-            bottom: var(--space-4);
+            bottom: var(--space-6);
             left: 50%;
-            transform: translateX(-50%) translateY(100px);
+            transform: translateX(-50%) translateY(calc(100% + 32px));
             display: flex;
             align-items: center;
-            gap: var(--space-2);
-            padding: var(--space-3) var(--space-4);
+            gap: var(--space-3);
+            padding: var(--space-4) var(--space-5);
             background: var(--color-text);
             color: white;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
             box-shadow: var(--shadow-modal);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 200;
         }
 
@@ -534,22 +733,25 @@
         }
 
         .toast.error {
-            background: hsl(0, 65%, 50%);
+            background: hsl(0, 70%, 50%);
         }
 
         .toast-undo {
-            padding: var(--space-1) var(--space-2);
-            background: transparent;
-            border: 1px solid white;
+            padding: var(--space-2) var(--space-3);
+            background: hsla(0, 0%, 100%, 0.2);
+            border: none;
             color: white;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 13px;
+            font-family: inherit;
+            font-size: var(--font-size-xs);
+            font-weight: 600;
             min-height: 32px;
+            transition: background var(--transition-fast);
         }
 
         .toast-undo:hover {
-            background: hsla(0, 0%, 100%, 0.1);
+            background: hsla(0, 0%, 100%, 0.3);
         }
 
         .hidden {
@@ -557,38 +759,60 @@
         }
 
         @media (max-width: 600px) {
+            .container {
+                padding: var(--space-4);
+            }
+
             .form-row {
                 grid-template-columns: 1fr;
             }
 
             .app-card {
                 grid-template-columns: 1fr;
+                padding: var(--space-4);
             }
 
             .app-card-actions {
                 justify-content: flex-end;
+                opacity: 1;
+            }
+
+            .auth-card {
+                padding: var(--space-5);
+            }
+
+            .modal-body,
+            .modal-header,
+            .modal-footer {
+                padding-left: var(--space-4);
+                padding-right: var(--space-4);
             }
         }
     </style>
 </head>
 
 <body>
+    <!-- Auth View -->
     <div class="auth-container" id="authView">
         <div class="auth-card">
-            <h1>📋 Job Tracker</h1>
+            <div class="auth-logo">
+                <div class="auth-logo-icon">📋</div>
+                <h1>Job Tracker</h1>
+                <p>Track your applications</p>
+            </div>
             <div class="auth-tabs">
-                <button class="auth-tab active" id="loginTab">Login</button>
-                <button class="auth-tab" id="registerTab">Register</button>
+                <button class="auth-tab active" id="loginTab">Sign In</button>
+                <button class="auth-tab" id="registerTab">Create Account</button>
             </div>
             <div class="auth-error" id="authError"></div>
             <form id="authForm">
                 <div class="form-group">
                     <label for="authUsername">Username</label>
                     <input type="text" id="authUsername" required minlength="3" autocomplete="username"
-                        placeholder="Enter username">
+                        placeholder="Enter your username">
                 </div>
                 <div class="form-group">
-                    <label>4-Digit PIN</label>
+                    <span class="pin-label">4-Digit PIN</span>
                     <div class="pin-input-group">
                         <input type="text" class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]"
                             data-pin="0">
@@ -600,16 +824,17 @@
                             data-pin="3">
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;" id="authSubmit">Login</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;" id="authSubmit">Sign In</button>
             </form>
         </div>
     </div>
 
+    <!-- App View -->
     <div class="container hidden" id="appView">
         <header>
-            <h1>Job Tracker</h1>
+            <h1>My Applications</h1>
             <div style="display: flex; align-items: center; gap: var(--space-3);">
-                <button class="btn btn-primary" id="addBtn"><span>+</span> Add</button>
+                <button class="btn btn-primary" id="addBtn">+ Add</button>
                 <button class="btn btn-secondary" id="logoutBtn">Logout</button>
             </div>
         </header>
@@ -634,16 +859,17 @@
                 </select>
             </div>
         </div>
-        <div class="loading" id="loading">Loading...</div>
+        <div class="loading" id="loading">Loading applications...</div>
         <div class="app-list" id="appList"></div>
         <div class="empty-state hidden" id="emptyState">
             <div class="empty-state-icon">📋</div>
             <h2>No applications yet</h2>
-            <p>Start tracking your job search</p>
+            <p>Start tracking your job search journey</p>
             <button class="btn btn-primary" id="addBtnEmpty">Add Your First Application</button>
         </div>
     </div>
 
+    <!-- Modal -->
     <div class="modal-backdrop" id="modalBackdrop">
         <div class="modal" role="dialog" aria-labelledby="modalTitle">
             <div class="modal-header">
@@ -652,30 +878,44 @@
             </div>
             <form id="appForm">
                 <div class="modal-body">
-                    <div class="form-group"><label for="company">Company *</label><input type="text" id="company"
-                            name="company" required></div>
-                    <div class="form-group"><label for="position">Position *</label><input type="text" id="position"
-                            name="position" required></div>
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input type="text" id="company" name="company" required placeholder="e.g. Google">
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Position</label>
+                        <input type="text" id="position" name="position" required placeholder="e.g. Software Engineer">
+                    </div>
                     <div class="form-row">
-                        <div class="form-group"><label for="status">Status</label><select id="status" name="status">
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <select id="status" name="status">
                                 <option value="wishlist">Wishlist</option>
                                 <option value="applied">Applied</option>
                                 <option value="interview">Interview</option>
                                 <option value="offer">Offer</option>
                                 <option value="accepted">Accepted</option>
                                 <option value="rejected">Rejected</option>
-                            </select></div>
-                        <div class="form-group"><label for="appliedDate">Date</label><input type="date" id="appliedDate"
-                                name="appliedDate"></div>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="appliedDate">Date Applied</label>
+                            <input type="date" id="appliedDate" name="appliedDate">
+                        </div>
                     </div>
-                    <div class="form-group"><label for="url">Job URL</label><input type="url" id="url" name="url"
-                            placeholder="https://..."></div>
-                    <div class="form-group"><label for="notes">Notes</label><textarea id="notes" name="notes"
-                            placeholder="Interview feedback, contacts, etc."></textarea></div>
+                    <div class="form-group">
+                        <label for="url">Job Posting URL</label>
+                        <input type="url" id="url" name="url" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" name="notes"
+                            placeholder="Interview details, contacts, follow-ups..."></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="saveBtn">Save</button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">Save Application</button>
                 </div>
             </form>
         </div>
@@ -701,7 +941,6 @@
         const sortBy = document.getElementById('sortBy'), toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage'), toastUndo = document.getElementById('toastUndo');
 
-        // PIN input handling
         pinInputs.forEach((input, idx) => {
             input.addEventListener('input', (e) => {
                 const val = e.target.value.replace(/\D/g, '');
@@ -727,8 +966,8 @@
 
         function showAuthError(msg) { authError.textContent = msg; authError.classList.add('visible'); }
         function hideAuthError() { authError.classList.remove('visible'); }
-        function switchToLogin() { isLoginMode = true; loginTab.classList.add('active'); registerTab.classList.remove('active'); authSubmit.textContent = 'Login'; hideAuthError(); }
-        function switchToRegister() { isLoginMode = false; registerTab.classList.add('active'); loginTab.classList.remove('active'); authSubmit.textContent = 'Register'; hideAuthError(); }
+        function switchToLogin() { isLoginMode = true; loginTab.classList.add('active'); registerTab.classList.remove('active'); authSubmit.textContent = 'Sign In'; hideAuthError(); }
+        function switchToRegister() { isLoginMode = false; registerTab.classList.add('active'); loginTab.classList.remove('active'); authSubmit.textContent = 'Create Account'; hideAuthError(); }
         loginTab.addEventListener('click', switchToLogin);
         registerTab.addEventListener('click', switchToRegister);
 
@@ -737,12 +976,12 @@
             hideAuthError();
             const username = authUsername.value.trim();
             const pin = getPin();
-            if (pin.length !== 4) { showAuthError('Enter 4-digit PIN'); return; }
+            if (pin.length !== 4) { showAuthError('Please enter your 4-digit PIN'); return; }
             try {
                 const endpoint = isLoginMode ? '/login' : '/register';
                 const res = await fetch(`${API_BASE}${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, pin }) });
                 const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Auth failed');
+                if (!res.ok) throw new Error(data.error || 'Authentication failed');
                 setToken(data.token);
                 showApp();
             } catch (err) { showAuthError(err.message); clearPin(); }
@@ -767,7 +1006,7 @@
         function renderStats() {
             const counts = { wishlist: 0, applied: 0, interview: 0, offer: 0, accepted: 0, rejected: 0 };
             applications.forEach(app => counts[app.status]++);
-            statsBar.innerHTML = Object.entries(counts).filter(([_, c]) => c > 0).map(([s, c]) => `<div class="stat"><span class="stat-dot dot-${s}"></span><span class="stat-count">${c}</span><span>${s}</span></div>`).join('');
+            statsBar.innerHTML = Object.entries(counts).filter(([_, c]) => c > 0).map(([s, c]) => `<div class="stat"><span class="stat-dot dot-${s}"></span><span class="stat-count">${c}</span><span class="stat-label">${s}</span></div>`).join('');
         }
         function renderList() {
             const filter = filterStatus.value, sort = sortBy.value;
@@ -775,12 +1014,12 @@
             filtered.sort((a, b) => sort === 'newest' ? new Date(b.createdAt) - new Date(a.createdAt) : sort === 'oldest' ? new Date(a.createdAt) - new Date(b.createdAt) : a.company.localeCompare(b.company));
             if (!filtered.length) { appList.innerHTML = ''; emptyState.classList.remove('hidden'); return; }
             emptyState.classList.add('hidden');
-            appList.innerHTML = filtered.map(app => `<div class="app-card" data-id="${app.id}"><div class="app-card-main"><div class="app-company">${escapeHtml(app.company)}</div><div class="app-position">${escapeHtml(app.position)}</div><div class="app-meta"><span class="app-status status-${app.status}">${app.status}</span>${app.appliedDate ? `<span>${formatDate(app.appliedDate)}</span>` : ''}${app.url ? `<a href="${escapeHtml(app.url)}" target="_blank" rel="noopener">View Job</a>` : ''}</div>${app.notes ? `<div style="margin-top:var(--space-2);font-size:13px;color:var(--color-text-secondary)">${escapeHtml(app.notes)}</div>` : ''}</div><div class="app-card-actions"><button class="btn btn-icon" onclick="editApp('${app.id}')" aria-label="Edit">✏️</button><button class="btn btn-icon" onclick="deleteApp('${app.id}')" aria-label="Delete">🗑️</button></div></div>`).join('');
+            appList.innerHTML = filtered.map(app => `<div class="app-card" data-id="${app.id}"><div class="app-card-main"><div class="app-company">${escapeHtml(app.company)}</div><div class="app-position">${escapeHtml(app.position)}</div><div class="app-meta"><span class="app-status status-${app.status}">${app.status}</span>${app.appliedDate ? `<span class="app-meta-item">${formatDate(app.appliedDate)}</span>` : ''}${app.url ? `<a href="${escapeHtml(app.url)}" target="_blank" rel="noopener">View posting →</a>` : ''}</div>${app.notes ? `<div class="app-notes">${escapeHtml(app.notes)}</div>` : ''}</div><div class="app-card-actions"><button class="btn btn-icon" onclick="editApp('${app.id}')" aria-label="Edit">✏️</button><button class="btn btn-icon" onclick="deleteApp('${app.id}')" aria-label="Delete">🗑️</button></div></div>`).join('');
         }
         function escapeHtml(s) { return s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : ''; }
         function formatDate(d) { try { return new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); } catch { return d; } }
 
-        function openModal(isEdit = false) { modalTitle.textContent = isEdit ? 'Edit Application' : 'Add Application'; document.getElementById('saveBtn').textContent = isEdit ? 'Update' : 'Save'; modalBackdrop.classList.add('active'); document.getElementById('company').focus(); }
+        function openModal(isEdit = false) { modalTitle.textContent = isEdit ? 'Edit Application' : 'Add Application'; document.getElementById('saveBtn').textContent = isEdit ? 'Save Changes' : 'Save Application'; modalBackdrop.classList.add('active'); document.getElementById('company').focus(); }
         function closeModal() { modalBackdrop.classList.remove('active'); appForm.reset(); editingId = null; }
 
         async function addApplication(data) {
@@ -789,12 +1028,12 @@
         }
         async function updateApplication(id, data) {
             const updates = { company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, updatedAt: new Date().toISOString() };
-            try { await apiRequest(`/applications/${id}`, { method: 'PUT', body: JSON.stringify(updates) }); const idx = applications.findIndex(a => a.id === id); if (idx !== -1) applications[idx] = { ...applications[idx], ...updates }; render(); showToast('Updated'); } catch (err) { showToast(err.message, false, true); }
+            try { await apiRequest(`/applications/${id}`, { method: 'PUT', body: JSON.stringify(updates) }); const idx = applications.findIndex(a => a.id === id); if (idx !== -1) applications[idx] = { ...applications[idx], ...updates }; render(); showToast('Changes saved'); } catch (err) { showToast(err.message, false, true); }
         }
         async function deleteApp(id) {
             const idx = applications.findIndex(a => a.id === id); if (idx === -1) return;
             deletedApp = { ...applications[idx], index: idx };
-            try { await apiRequest(`/applications/${id}`, { method: 'DELETE' }); applications.splice(idx, 1); render(); showToast('Deleted', true); } catch (err) { deletedApp = null; showToast(err.message, false, true); }
+            try { await apiRequest(`/applications/${id}`, { method: 'DELETE' }); applications.splice(idx, 1); render(); showToast('Application deleted', true); } catch (err) { deletedApp = null; showToast(err.message, false, true); }
         }
         async function undoDelete() {
             if (!deletedApp) return;
