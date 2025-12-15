@@ -1824,7 +1824,9 @@
 
             appList.innerHTML = filtered.map(app => {
                 const interviews = interviewsMap[app.id] || [];
-                const interviewsHtml = interviews.length > 0 ? `
+                // Only show interviews for interview/offer/accepted statuses
+                const showInterviews = ['interview', 'offer', 'accepted'].includes(app.status) && interviews.length > 0;
+                const interviewsHtml = showInterviews ? `
                     <div class="app-interviews" style="margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px dashed var(--color-border);">
                         <div style="font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-bottom: var(--space-2);">📅 Interviews:</div>
                         ${interviews.map(i => `
