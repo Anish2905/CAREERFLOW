@@ -1818,11 +1818,13 @@
                         <div class="app-meta">
                             <span class="app-status status-${app.status}">${app.status}</span>
                             ${app.appliedDate ? `<span class="app-meta-item">${formatDate(app.appliedDate)}</span>` : ''}
+                            ${app.resumeId ? `<button class="btn btn-icon" onclick="event.stopPropagation(); viewResume('${app.resumeId}')" title="View Resume" style="font-size: 12px;">📄</button>` : ''}
                             ${app.url ? `<a href="${escapeHtml(app.url)}" target="_blank" rel="noopener">View posting →</a>` : ''}
                         </div>
                         ${app.notes ? `<div class="app-notes">${escapeHtml(app.notes)}</div>` : ''}
                     </div>
                     <div class="app-card-actions">
+                        ${app.status === 'interview' ? `<button class="btn btn-icon" onclick="openInterviewModal('${app.id}')" aria-label="Add Interview" title="Add Interview">📅</button>` : ''}
                         <button class="btn btn-icon" onclick="editApp('${app.id}')" aria-label="Edit">✏️</button>
                         <button class="btn btn-icon" onclick="deleteApp('${app.id}')" aria-label="Delete">🗑️</button>
                     </div>
@@ -1848,6 +1850,7 @@
         async function updateApplication(id, data) {
             const existing = await getLocalById(id);
             if (!existing) return;
+            const statusChangedToInterview = existing.status !== 'interview' && data.status === 'interview';
             const updated = { ...existing, company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, resumeId: data.resumeId || null, updatedAt: new Date().toISOString() };
             await saveLocal(updated);
             addPendingChange(id);
@@ -1855,6 +1858,10 @@
             if (idx !== -1) applications[idx] = updated;
             render();
             showToast('Changes saved');
+            // Auto-open interview modal if status changed to interview
+            if (statusChangedToInterview) {
+                setTimeout(() => openInterviewModal(id), 300);
+            }
         }
 
         // Delete confirmation modal
@@ -2110,6 +2117,29 @@
             await populateResumeDropdown();
             originalOpenModal(isEdit);
         };
+
+        // ===== View Resume =====
+        async function viewResume(resumeId) {
+            const resume = await getResumeById(resumeId);
+            if (!resume || !resume.fileData) {
+                showToast('Resume not found', false, true);
+                return;
+            }
+            // Open in new tab
+            const win = window.open();
+            if (resume.fileType === 'application/pdf') {
+                win.document.write(`<iframe src="${resume.fileData}" style="width:100%;height:100%;border:none;"></iframe>`);
+            } else {
+                // For DOC/DOCX, trigger download
+                const a = document.createElement('a');
+                a.href = resume.fileData;
+                a.download = resume.fileName;
+                a.click();
+                showToast(`Downloading ${resume.fileName}`);
+                if (win) win.close();
+            }
+        }
+        window.viewResume = viewResume;
     </script>
 </body>
 
