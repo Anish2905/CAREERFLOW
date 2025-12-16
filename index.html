@@ -2215,14 +2215,8 @@
         // Make openInterviewModal available globally
         window.openInterviewModal = openInterviewModal;
 
-        // Populate resume dropdown on modal open
-        const originalOpenModal = openModal;
-        openModal = async function (isEdit = false) {
-            if (!isEdit) {
-                await showResumeUI(null); // New app - show upload section
-            }
-            originalOpenModal(isEdit);
-        };
+        // Resume feature now uses simple URL links - no file upload/sync needed
+        // The modal opens directly using the original function
 
         // ===== View Resume =====
         async function viewResume(resumeId) {
