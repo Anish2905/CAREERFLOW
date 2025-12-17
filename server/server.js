@@ -217,12 +217,12 @@ app.get('/api/applications', authMiddleware, (req, res) => {
 app.post('/api/applications', authMiddleware, (req, res) => {
     try {
         const db = getDb();
-        const { id, company, position, status, appliedDate, url, notes, resumeUrl, createdAt, updatedAt } = req.body;
+        const { id, company, position, location, status, appliedDate, deadline, tags, url, notes, resumeUrl, createdAt, updatedAt } = req.body;
 
         db.run(`
-      INSERT INTO applications (id, user_id, company, position, status, applied_date, url, notes, resume_url, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [id, req.userId, company, position, status || 'wishlist', appliedDate || null, url || null, notes || null, resumeUrl || null, createdAt, updatedAt]);
+      INSERT INTO applications (id, user_id, company, position, location, status, applied_date, deadline, tags, url, notes, resume_url, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [id, req.userId, company, position, location || null, status || 'wishlist', appliedDate || null, deadline || null, tags ? JSON.stringify(tags) : null, url || null, notes || null, resumeUrl || null, createdAt, updatedAt]);
 
         saveDatabase();
         res.status(201).json({ success: true, id });
@@ -237,7 +237,7 @@ app.put('/api/applications/:id', authMiddleware, (req, res) => {
     try {
         const db = getDb();
         const { id } = req.params;
-        const { company, position, status, appliedDate, url, notes, resumeUrl, updatedAt } = req.body;
+        const { company, position, location, status, appliedDate, deadline, tags, url, notes, resumeUrl, updatedAt } = req.body;
 
         // Verify ownership
         const check = db.exec('SELECT id FROM applications WHERE id = ? AND user_id = ?', [id, req.userId]);
@@ -247,9 +247,9 @@ app.put('/api/applications/:id', authMiddleware, (req, res) => {
 
         db.run(`
       UPDATE applications 
-      SET company = ?, position = ?, status = ?, applied_date = ?, url = ?, notes = ?, resume_url = ?, updated_at = ?
+      SET company = ?, position = ?, location = ?, status = ?, applied_date = ?, deadline = ?, tags = ?, url = ?, notes = ?, resume_url = ?, updated_at = ?
       WHERE id = ? AND user_id = ?
-    `, [company, position, status, appliedDate || null, url || null, notes || null, resumeUrl || null, updatedAt, id, req.userId]);
+    `, [company, position, location || null, status, appliedDate || null, deadline || null, tags ? JSON.stringify(tags) : null, url || null, notes || null, resumeUrl || null, updatedAt, id, req.userId]);
 
         saveDatabase();
         res.json({ success: true });

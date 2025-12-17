@@ -1,0 +1,36 @@
+{
+    "name": "JobTracker",
+    "short_name": "JobTracker",
+    "description": "Track your job applications with a beautiful, offline-first progressive web app",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0f172a",
+    "theme_color": "#6366f1",
+    "orientation": "any",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='20'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>📋</text></svg>",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='20'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>📋</text></svg>",
+            "sizes": "192x192",
+            "type": "image/svg+xml",
+            "purpose": "maskable"
+        },
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='20'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>📋</text></svg>",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "maskable"
+        }
+    ],
+    "categories": [
+        "productivity",
+        "utilities"
+    ],
+    "screenshots": [],
+    "prefer_related_applications": false
+}

@@ -6,17 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Job Tracker</title>
     <meta name="description" content="Track your job applications, interviews, and offers in one place.">
+    <!-- PWA Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="JobTracker">
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%236366f1' width='100' height='100' rx='20'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>📋</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* ===== Design Tokens (following rules) ===== */
         :root {
-            /* HSL Color Palette - Primary */
-            --hue-primary: 250;
-            --color-primary: hsl(var(--hue-primary), 85%, 60%);
-            --color-primary-hover: hsl(var(--hue-primary), 85%, 50%);
+            /* HSL Color Palette - Primary (Vibrant Blue #2563eb) */
+            --hue-primary: 217;
+            --color-primary: hsl(var(--hue-primary), 91%, 60%);
+            --color-primary-hover: hsl(var(--hue-primary), 91%, 50%);
             --color-primary-light: hsl(var(--hue-primary), 85%, 95%);
+
+            /* Ambient Glow */
+            --glow-primary: hsla(var(--hue-primary), 100%, 60%, 0.15);
+            --glow-strong: hsla(var(--hue-primary), 100%, 50%, 0.25);
 
             /* Background & Surface */
             --color-bg: hsl(240, 20%, 98%);
@@ -164,6 +176,31 @@
             line-height: var(--line-height-base);
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        /* ===== Premium Ambient Glow/Vignette ===== */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background:
+                radial-gradient(ellipse at top left, var(--glow-primary) 0%, transparent 50%),
+                radial-gradient(ellipse at top right, hsla(280, 80%, 60%, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom left, hsla(200, 90%, 50%, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, var(--glow-primary) 0%, transparent 50%);
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        [data-theme="dark"] body::before {
+            background:
+                radial-gradient(ellipse at top left, hsla(var(--hue-primary), 80%, 50%, 0.12) 0%, transparent 45%),
+                radial-gradient(ellipse at top right, hsla(280, 70%, 50%, 0.08) 0%, transparent 45%),
+                radial-gradient(ellipse at bottom left, hsla(200, 80%, 40%, 0.08) 0%, transparent 45%),
+                radial-gradient(ellipse at bottom right, hsla(var(--hue-primary), 80%, 50%, 0.12) 0%, transparent 45%);
         }
 
         /* ===== Keyframe Animations ===== */
@@ -201,6 +238,34 @@
             }
         }
 
+        @keyframes breathingGlow {
+
+            0%,
+            100% {
+                box-shadow:
+                    0 4px 16px hsla(var(--hue-primary), 90%, 50%, 0.3),
+                    0 0 0 0 hsla(var(--hue-primary), 90%, 60%, 0.4);
+            }
+
+            50% {
+                box-shadow:
+                    0 6px 24px hsla(var(--hue-primary), 90%, 50%, 0.45),
+                    0 0 0 4px hsla(var(--hue-primary), 90%, 60%, 0.15);
+            }
+        }
+
+        @keyframes cardEntrance {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* ===== Layout ===== */
         .container {
             max-width: 800px;
@@ -216,16 +281,46 @@
             margin-bottom: var(--space-6);
             padding: var(--space-5);
             padding-bottom: var(--space-5);
-            border-radius: var(--radius-lg);
-            background: hsla(var(--hue-primary), 30%, 98%, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid hsla(var(--hue-primary), 40%, 90%, 0.5);
-            box-shadow: 0 2px 12px hsla(var(--hue-primary), 50%, 50%, 0.05);
+            border-radius: var(--radius-xl);
+            background: hsla(0, 0%, 100%, 0.7);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid hsla(var(--hue-primary), 60%, 80%, 0.3);
+            box-shadow:
+                0 4px 24px hsla(var(--hue-primary), 60%, 50%, 0.08),
+                inset 0 1px 0 hsla(0, 0%, 100%, 0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                    transparent,
+                    hsla(var(--hue-primary), 80%, 70%, 0.5),
+                    hsla(280, 80%, 70%, 0.3),
+                    transparent);
         }
 
         [data-theme="dark"] header {
-            background: hsla(240, 15%, 15%, 0.7);
-            border-color: hsla(240, 15%, 25%, 0.5);
+            background: hsla(240, 15%, 12%, 0.75);
+            border-color: hsla(var(--hue-primary), 40%, 40%, 0.25);
+            box-shadow:
+                0 4px 24px hsla(0, 0%, 0%, 0.3),
+                inset 0 1px 0 hsla(0, 0%, 100%, 0.05);
+        }
+
+        [data-theme="dark"] header::before {
+            background: linear-gradient(90deg,
+                    transparent,
+                    hsla(var(--hue-primary), 70%, 50%, 0.4),
+                    hsla(280, 70%, 50%, 0.2),
+                    transparent);
         }
 
         h1 {
@@ -318,10 +413,11 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--color-primary) 0%, hsl(280, 75%, 55%) 100%);
+            background: linear-gradient(135deg, var(--color-primary) 0%, hsl(250, 85%, 58%) 100%);
             color: white;
             position: relative;
             overflow: hidden;
+            border: 1px solid hsla(0, 0%, 100%, 0.1);
         }
 
         .btn-primary::before {
@@ -331,7 +427,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, hsla(0, 0%, 100%, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, hsla(0, 0%, 100%, 0.25), transparent);
             transition: left 0.5s;
         }
 
@@ -341,7 +437,17 @@
 
         .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px hsla(var(--hue-primary), 85%, 50%, 0.4);
+            box-shadow: 0 8px 24px hsla(var(--hue-primary), 90%, 50%, 0.45);
+        }
+
+        /* Pulsing CTA Button - for main Add action */
+        .btn-cta-pulse {
+            animation: breathingGlow 2.5s ease-in-out infinite;
+        }
+
+        .btn-cta-pulse:hover {
+            animation: none;
+            box-shadow: 0 8px 28px hsla(var(--hue-primary), 90%, 50%, 0.5);
         }
 
         .btn-secondary {
@@ -622,6 +728,8 @@
         }
 
         .app-card {
+            --mouse-x: 50%;
+            --mouse-y: 50%;
             display: grid;
             grid-template-columns: 1fr auto;
             gap: var(--space-4);
@@ -629,10 +737,44 @@
             background: var(--color-surface);
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-card);
-            transition: all var(--transition-base);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid var(--color-border);
             position: relative;
             overflow: hidden;
+            animation: cardEntrance 0.4s ease-out backwards;
+        }
+
+        /* Staggered animation delays */
+        .app-card:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .app-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .app-card:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .app-card:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .app-card:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .app-card:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        .app-card:nth-child(7) {
+            animation-delay: 0.35s;
+        }
+
+        .app-card:nth-child(8) {
+            animation-delay: 0.4s;
         }
 
         /* Interview reminder - highlight cards with interview status */
@@ -705,9 +847,25 @@
         }
 
         .app-card:hover {
-            box-shadow: var(--shadow-card-hover);
-            transform: translateY(-2px);
-            border-color: var(--color-border-hover);
+            box-shadow:
+                var(--shadow-card-hover),
+                0 0 0 1px hsla(var(--hue-primary), 60%, 60%, 0.1);
+            transform: translateY(-3px);
+            border-color: hsla(var(--hue-primary), 60%, 70%, 0.3);
+            background:
+                radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
+                    hsla(var(--hue-primary), 80%, 65%, 0.06) 0%,
+                    transparent 40%),
+                var(--color-surface);
+        }
+
+        [data-theme="dark"] .app-card:hover {
+            background:
+                radial-gradient(600px circle at var(--mouse-x) var(--mouse-y),
+                    hsla(var(--hue-primary), 70%, 50%, 0.1) 0%,
+                    transparent 40%),
+                var(--color-surface);
+            border-color: hsla(var(--hue-primary), 50%, 50%, 0.25);
         }
 
         .app-card-main {
@@ -813,6 +971,58 @@
         .app-status.status-rejected {
             background: hsl(0, 70%, 93%);
             color: hsl(0, 70%, 40%);
+        }
+
+        /* Quick Status Dropdown */
+        .quick-status-select {
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            text-transform: uppercase;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .quick-status-select.status-wishlist {
+            background: hsl(200, 80%, 93%);
+            color: hsl(200, 80%, 35%);
+        }
+
+        .quick-status-select.status-applied {
+            background: hsl(270, 70%, 93%);
+            color: hsl(270, 70%, 40%);
+        }
+
+        .quick-status-select.status-interview {
+            background: hsl(35, 95%, 90%);
+            color: hsl(35, 95%, 30%);
+        }
+
+        .quick-status-select.status-offer {
+            background: hsl(155, 65%, 90%);
+            color: hsl(155, 65%, 28%);
+        }
+
+        .quick-status-select.status-accepted {
+            background: hsl(145, 75%, 90%);
+            color: hsl(145, 75%, 25%);
+        }
+
+        .quick-status-select.status-rejected {
+            background: hsl(0, 70%, 93%);
+            color: hsl(0, 70%, 40%);
+        }
+
+        .quick-status-select:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px hsla(0, 0%, 0%, 0.1);
+        }
+
+        .quick-status-select:focus {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 1px;
         }
 
         .dot-wishlist {
@@ -1241,11 +1451,40 @@
                     title="Toggle dark mode">🌙</button>
                 <button class="btn btn-icon" id="exportBtn" aria-label="Export to CSV" title="Export to CSV">📥</button>
                 <button class="btn btn-icon" id="syncBtn" aria-label="Sync Now" title="Sync Now">🔄</button>
-                <button class="btn btn-primary" id="addBtn">+ Add</button>
+                <button class="btn btn-primary btn-cta-pulse" id="addBtn">+ Add</button>
                 <button class="btn btn-secondary" id="logoutBtn">Logout</button>
             </div>
         </header>
         <div class="stats-bar" id="statsBar"></div>
+
+        <!-- Activity Analytics Section -->
+        <div id="analyticsSection"
+            style="margin-bottom: var(--space-4); padding: var(--space-4); background: var(--color-surface); border-radius: var(--radius-md); border: 1px solid var(--color-border);">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3);">
+                <h3 style="font-size: var(--font-size-base); font-weight: 600; margin: 0;">📊 Application Activity</h3>
+                <div style="display: flex; gap: var(--space-1);">
+                    <button type="button" class="chart-period-btn" data-period="daily" onclick="setChartPeriod('daily')"
+                        style="padding: 4px 10px; font-size: var(--font-size-xs); border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface-raised); cursor: pointer; transition: all var(--transition-fast);">Daily</button>
+                    <button type="button" class="chart-period-btn active" data-period="weekly"
+                        onclick="setChartPeriod('weekly')"
+                        style="padding: 4px 10px; font-size: var(--font-size-xs); border-radius: var(--radius-sm); border: 1px solid var(--color-primary); background: var(--color-primary); color: white; cursor: pointer; transition: all var(--transition-fast);">Weekly</button>
+                    <button type="button" class="chart-period-btn" data-period="monthly"
+                        onclick="setChartPeriod('monthly')"
+                        style="padding: 4px 10px; font-size: var(--font-size-xs); border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface-raised); cursor: pointer; transition: all var(--transition-fast);">Monthly</button>
+                </div>
+            </div>
+            <div id="activityChart" style="width: 100%; height: 150px; position: relative;"></div>
+            <div id="chartLegend"
+                style="display: flex; gap: var(--space-4); margin-top: var(--space-2); font-size: var(--font-size-xs); color: var(--color-text-secondary);">
+            </div>
+        </div>
+        <div class="search-bar" style="margin-bottom: var(--space-4);">
+            <div style="position: relative;">
+                <input type="text" id="searchInput" placeholder="🔍 Search by company, position, location, or notes..."
+                    style="width: 100%; padding: var(--space-3) var(--space-4); padding-left: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface); font-family: inherit; font-size: var(--font-size-sm); color: var(--color-text); transition: all var(--transition-fast);">
+            </div>
+        </div>
         <div class="controls">
             <div class="select-wrap">
                 <select id="filterStatus">
@@ -1293,6 +1532,10 @@
                         <label for="position">Position</label>
                         <input type="text" id="position" name="position" required placeholder="e.g. Software Engineer">
                     </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" placeholder="e.g. San Francisco, CA or Remote">
+                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="status">Status</label>
@@ -1311,13 +1554,60 @@
                         </div>
                     </div>
                     <div class="form-group">
+                        <label for="deadline">Application Deadline</label>
+                        <input type="date" id="deadline" name="deadline" title="Optional deadline for this application">
+                    </div>
+                    <div class="form-group">
                         <label for="url">Job Posting URL</label>
                         <input type="url" id="url" name="url" placeholder="https://...">
                     </div>
                     <div class="form-group">
-                        <label for="notes">Notes</label>
-                        <textarea id="notes" name="notes"
-                            placeholder="Interview details, contacts, follow-ups..."></textarea>
+                        <label>Tags</label>
+                        <div id="tagsContainer"
+                            style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-1);">
+                            <label class="tag-checkbox"
+                                style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--color-surface-raised); border: 1px solid var(--color-border); cursor: pointer; font-size: var(--font-size-sm); transition: all var(--transition-fast);">
+                                <input type="checkbox" name="tags" value="dream"
+                                    style="accent-color: hsl(270, 70%, 50%);"> 🌟 Dream Job
+                            </label>
+                            <label class="tag-checkbox"
+                                style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--color-surface-raised); border: 1px solid var(--color-border); cursor: pointer; font-size: var(--font-size-sm); transition: all var(--transition-fast);">
+                                <input type="checkbox" name="tags" value="referral"
+                                    style="accent-color: hsl(200, 80%, 50%);"> 🤝 Referral
+                            </label>
+                            <label class="tag-checkbox"
+                                style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--color-surface-raised); border: 1px solid var(--color-border); cursor: pointer; font-size: var(--font-size-sm); transition: all var(--transition-fast);">
+                                <input type="checkbox" name="tags" value="remote"
+                                    style="accent-color: hsl(155, 65%, 45%);"> 🏠 Remote
+                            </label>
+                            <label class="tag-checkbox"
+                                style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--color-surface-raised); border: 1px solid var(--color-border); cursor: pointer; font-size: var(--font-size-sm); transition: all var(--transition-fast);">
+                                <input type="checkbox" name="tags" value="urgent"
+                                    style="accent-color: hsl(0, 70%, 50%);"> 🔥 Urgent
+                            </label>
+                            <label class="tag-checkbox"
+                                style="display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: var(--radius-sm); background: var(--color-surface-raised); border: 1px solid var(--color-border); cursor: pointer; font-size: var(--font-size-sm); transition: all var(--transition-fast);">
+                                <input type="checkbox" name="tags" value="backup"
+                                    style="accent-color: hsl(45, 90%, 50%);"> 🛡️ Backup
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-1);">
+                            <label for="notes" style="margin-bottom: 0;">Notes</label>
+                            <button type="button" id="toggleNotesPreview" onclick="toggleMarkdownPreview()"
+                                style="font-size: var(--font-size-xs); padding: 4px 8px; border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-raised); cursor: pointer; transition: all var(--transition-fast);">👁️
+                                Preview</button>
+                        </div>
+                        <textarea id="notes" name="notes" placeholder="**Bold**, *italic*, - lists, [links](url)..."
+                            style="min-height: 100px;"></textarea>
+                        <div id="notesPreview"
+                            style="display: none; min-height: 100px; padding: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-raised); font-size: var(--font-size-sm); line-height: var(--line-height-relaxed);">
+                        </div>
+                        <small
+                            style="display: block; margin-top: var(--space-1); color: var(--color-text-tertiary);">Supports:
+                            **bold**, *italic*, - lists, [link](url)</small>
                     </div>
                     <div class="form-group">
                         <label for="resumeUrl">Resume Link</label>
@@ -1467,6 +1757,22 @@
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
             if (!localStorage.getItem(THEME_KEY)) setTheme(e.matches ? 'dark' : 'light');
         });
+
+        // ===== Premium Card Spotlight Effect (Mouse Tracking) =====
+        (function () {
+            const cardList = document.getElementById('appList');
+            if (cardList) {
+                cardList.addEventListener('mousemove', (e) => {
+                    const card = e.target.closest('.app-card');
+                    if (!card) return;
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    card.style.setProperty('--mouse-x', `${x}px`);
+                    card.style.setProperty('--mouse-y', `${y}px`);
+                });
+            }
+        })();
 
         // ===== Connection Status Indicator =====
         const statusIndicator = document.getElementById('statusIndicator');
@@ -1879,7 +2185,7 @@
         }
         function generateId() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => { const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16); }); }
 
-        function render() { renderStats(); renderList(); }
+        function render() { renderStats(); renderList(); renderActivityChart(); }
         function renderStats() {
             const counts = { wishlist: 0, applied: 0, interview: 0, offer: 0, accepted: 0, rejected: 0 };
             applications.forEach(app => counts[app.status]++);
@@ -1887,7 +2193,20 @@
         }
         async function renderList() {
             const filter = filterStatus.value, sort = sortBy.value;
+            const searchQuery = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+
             let filtered = filter === 'all' ? [...applications] : applications.filter(a => a.status === filter);
+
+            // Apply search filter
+            if (searchQuery) {
+                filtered = filtered.filter(a =>
+                    (a.company || '').toLowerCase().includes(searchQuery) ||
+                    (a.position || '').toLowerCase().includes(searchQuery) ||
+                    (a.location || '').toLowerCase().includes(searchQuery) ||
+                    (a.notes || '').toLowerCase().includes(searchQuery)
+                );
+            }
+
             filtered.sort((a, b) => sort === 'newest' ? new Date(b.createdAt) - new Date(a.createdAt) : sort === 'oldest' ? new Date(a.createdAt) - new Date(b.createdAt) : a.company.localeCompare(b.company));
             if (!filtered.length) { appList.innerHTML = ''; emptyState.classList.remove('hidden'); return; }
             emptyState.classList.add('hidden');
@@ -1921,14 +2240,21 @@
                 <div class="app-card status-${app.status} ${app.status === 'interview' ? 'interview-highlight' : ''}" data-id="${app.id}">
                     <div class="app-card-main">
                         <div class="app-company">${escapeHtml(app.company)}</div>
-                        <div class="app-position">${escapeHtml(app.position)}</div>
+                        <div class="app-position">${escapeHtml(app.position)}${app.location ? ` <span style="color: var(--color-text-tertiary);">• 📍 ${escapeHtml(app.location)}</span>` : ''}</div>
                         <div class="app-meta">
-                            <span class="app-status status-${app.status}">${app.status}</span>
+                            <select class="quick-status-select status-${app.status}" onchange="quickStatusChange('${app.id}', this.value)" onclick="event.stopPropagation()" title="Quick status change">
+                                <option value="wishlist" ${app.status === 'wishlist' ? 'selected' : ''}>Wishlist</option>
+                                <option value="applied" ${app.status === 'applied' ? 'selected' : ''}>Applied</option>
+                                <option value="interview" ${app.status === 'interview' ? 'selected' : ''}>Interview</option>
+                                <option value="offer" ${app.status === 'offer' ? 'selected' : ''}>Offer</option>
+                                <option value="accepted" ${app.status === 'accepted' ? 'selected' : ''}>Accepted</option>
+                                <option value="rejected" ${app.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                            </select>
                             ${app.appliedDate ? `<span class="app-meta-item">${formatDate(app.appliedDate)}</span>` : ''}
                             ${app.resumeUrl ? `<a href="${escapeHtml(app.resumeUrl)}" target="_blank" rel="noopener" title="View Resume">📄 Resume</a>` : ''}
                             ${app.url ? `<a href="${escapeHtml(app.url)}" target="_blank" rel="noopener">View posting →</a>` : ''}
                         </div>
-                        ${app.notes ? `<div class="app-notes">${escapeHtml(app.notes)}</div>` : ''}
+                        ${app.notes ? `<div class="app-notes">${parseMarkdown(app.notes)}</div>` : ''}
                         ${interviewsHtml}
                     </div>
                     <div class="app-card-actions">
@@ -1942,12 +2268,141 @@
         function escapeHtml(s) { return s ? s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : ''; }
         function formatDate(d) { try { return new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }); } catch { return d; } }
 
+        // Simple markdown parser
+        function parseMarkdown(text) {
+            if (!text) return '';
+            let html = escapeHtml(text);
+            html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+            html = html.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+            html = html.replace(/^- (.+)$/gm, '• $1');
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
+
+        // Toggle markdown preview
+        let notesPreviewMode = false;
+        function toggleMarkdownPreview() {
+            notesPreviewMode = !notesPreviewMode;
+            const textarea = document.getElementById('notes');
+            const preview = document.getElementById('notesPreview');
+            const btn = document.getElementById('toggleNotesPreview');
+            if (notesPreviewMode) {
+                preview.innerHTML = parseMarkdown(textarea.value) || '<span style="color: var(--color-text-tertiary);">Nothing to preview</span>';
+                preview.style.display = 'block';
+                textarea.style.display = 'none';
+                btn.textContent = '✏️ Edit';
+            } else {
+                preview.style.display = 'none';
+                textarea.style.display = 'block';
+                btn.textContent = '👁️ Preview';
+            }
+        }
+
+        // ===== Activity Chart =====
+        let currentChartPeriod = 'weekly';
+
+        function setChartPeriod(period) {
+            currentChartPeriod = period;
+            document.querySelectorAll('.chart-period-btn').forEach(btn => {
+                const isActive = btn.dataset.period === period;
+                btn.style.background = isActive ? 'var(--color-primary)' : 'var(--color-surface-raised)';
+                btn.style.color = isActive ? 'white' : 'inherit';
+                btn.style.borderColor = isActive ? 'var(--color-primary)' : 'var(--color-border)';
+            });
+            renderActivityChart();
+        }
+
+        function renderActivityChart() {
+            const chartEl = document.getElementById('activityChart');
+            const legendEl = document.getElementById('chartLegend');
+            if (!chartEl || !applications.length) {
+                if (chartEl) chartEl.innerHTML = '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--color-text-tertiary); font-size: var(--font-size-sm);">No data to display</div>';
+                if (legendEl) legendEl.innerHTML = '';
+                return;
+            }
+
+            const now = new Date();
+            let buckets = [];
+            let labels = [];
+
+            if (currentChartPeriod === 'daily') {
+                // Last 7 days
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(now); d.setDate(d.getDate() - i);
+                    const key = d.toISOString().split('T')[0];
+                    const label = d.toLocaleDateString(undefined, { weekday: 'short' });
+                    buckets.push({ key, label, count: 0 });
+                }
+            } else if (currentChartPeriod === 'weekly') {
+                // Last 4 weeks
+                for (let i = 3; i >= 0; i--) {
+                    const weekStart = new Date(now); weekStart.setDate(weekStart.getDate() - (i * 7) - weekStart.getDay());
+                    const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+                    buckets.push({ start: weekStart, end: weekEnd, label: `Week ${4 - i}`, count: 0 });
+                }
+            } else {
+                // Last 6 months
+                for (let i = 5; i >= 0; i--) {
+                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    const label = d.toLocaleDateString(undefined, { month: 'short' });
+                    buckets.push({ month: d.getMonth(), year: d.getFullYear(), label, count: 0 });
+                }
+            }
+
+            // Count applications per bucket
+            applications.forEach(app => {
+                const created = new Date(app.createdAt);
+                buckets.forEach(b => {
+                    if (currentChartPeriod === 'daily') {
+                        if (created.toISOString().split('T')[0] === b.key) b.count++;
+                    } else if (currentChartPeriod === 'weekly') {
+                        if (created >= b.start && created <= b.end) b.count++;
+                    } else {
+                        if (created.getMonth() === b.month && created.getFullYear() === b.year) b.count++;
+                    }
+                });
+            });
+
+            const maxCount = Math.max(...buckets.map(b => b.count), 1);
+            const barWidth = Math.floor(100 / buckets.length) - 2;
+            const chartHeight = 120;
+
+            // Build SVG
+            let svg = `<svg width="100%" height="${chartHeight}" viewBox="0 0 100 ${chartHeight}" preserveAspectRatio="none" style="overflow: visible;">`;
+            buckets.forEach((b, i) => {
+                const barHeight = (b.count / maxCount) * (chartHeight - 20);
+                const x = i * (100 / buckets.length) + 1;
+                const y = chartHeight - barHeight - 15;
+                const color = `hsl(var(--hue-primary), 70%, ${55 + (i % 2) * 10}%)`;
+                svg += `<rect x="${x}%" y="${y}" width="${barWidth}%" height="${barHeight}" rx="3" fill="${color}" style="transition: all 0.3s;"><title>${b.label}: ${b.count}</title></rect>`;
+                svg += `<text x="${x + barWidth / 2}%" y="${chartHeight - 2}" text-anchor="middle" font-size="8" fill="var(--color-text-secondary)">${b.label}</text>`;
+                if (b.count > 0) svg += `<text x="${x + barWidth / 2}%" y="${y - 3}" text-anchor="middle" font-size="7" fill="var(--color-text-secondary)">${b.count}</text>`;
+            });
+            svg += '</svg>';
+            chartEl.innerHTML = svg;
+
+            // Legend
+            const total = buckets.reduce((sum, b) => sum + b.count, 0);
+            legendEl.innerHTML = `<span>Total: <strong>${total}</strong> applications</span><span>Avg: <strong>${(total / buckets.length).toFixed(1)}</strong> per ${currentChartPeriod === 'daily' ? 'day' : currentChartPeriod === 'weekly' ? 'week' : 'month'}</span>`;
+        }
+
         function openModal(isEdit = false) { modalTitle.textContent = isEdit ? 'Edit Application' : 'Add Application'; document.getElementById('saveBtn').textContent = isEdit ? 'Save Changes' : 'Save Application'; modalBackdrop.classList.add('active'); document.getElementById('company').focus(); }
         function closeModal() { modalBackdrop.classList.remove('active'); appForm.reset(); editingId = null; }
 
+        // Quick status change from card dropdown
+        async function quickStatusChange(id, newStatus) {
+            const app = applications.find(a => a.id === id);
+            if (!app || app.status === newStatus) return;
+            const data = { ...app, status: newStatus };
+            await updateApplication(id, data);
+        }
+
         // Local-first CRUD functions
         async function addApplication(data) {
-            const app = { id: generateId(), company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, resumeUrl: data.resumeUrl?.trim() || null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+            // Collect tags from checkboxes
+            const tagsArray = Array.from(document.querySelectorAll('input[name="tags"]:checked')).map(cb => cb.value);
+            const app = { id: generateId(), company: data.company.trim(), position: data.position.trim(), location: data.location?.trim() || null, status: data.status, appliedDate: data.appliedDate || null, deadline: data.deadline || null, tags: tagsArray.length > 0 ? tagsArray : null, url: data.url.trim() || null, notes: data.notes.trim() || null, resumeUrl: data.resumeUrl?.trim() || null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
             await saveLocal(app);
             addPendingChange(app.id);
             applications.unshift(app);
@@ -1963,7 +2418,9 @@
             const existing = await getLocalById(id);
             if (!existing) return;
             const statusChangedToInterview = existing.status !== 'interview' && data.status === 'interview';
-            const updated = { ...existing, company: data.company.trim(), position: data.position.trim(), status: data.status, appliedDate: data.appliedDate || null, url: data.url.trim() || null, notes: data.notes.trim() || null, resumeUrl: data.resumeUrl?.trim() || null, updatedAt: new Date().toISOString() };
+            // Collect tags from checkboxes
+            const tagsArray = Array.from(document.querySelectorAll('input[name="tags"]:checked')).map(cb => cb.value);
+            const updated = { ...existing, company: data.company.trim(), position: data.position.trim(), location: data.location?.trim() || null, status: data.status, appliedDate: data.appliedDate || null, deadline: data.deadline || null, tags: tagsArray.length > 0 ? tagsArray : null, url: data.url.trim() || null, notes: data.notes.trim() || null, resumeUrl: data.resumeUrl?.trim() || null, updatedAt: new Date().toISOString() };
             await saveLocal(updated);
             addPendingChange(id);
             const idx = applications.findIndex(a => a.id === id);
@@ -2038,8 +2495,18 @@
             editingId = id;
             document.getElementById('company').value = app.company;
             document.getElementById('position').value = app.position;
+            document.getElementById('location').value = app.location || '';
             document.getElementById('status').value = app.status;
             document.getElementById('appliedDate').value = app.appliedDate || '';
+            document.getElementById('deadline').value = app.deadline || '';
+            // Load tags - uncheck all first, then check saved ones
+            document.querySelectorAll('input[name="tags"]').forEach(cb => cb.checked = false);
+            if (app.tags && Array.isArray(app.tags)) {
+                app.tags.forEach(tag => {
+                    const cb = document.querySelector(`input[name="tags"][value="${tag}"]`);
+                    if (cb) cb.checked = true;
+                });
+            }
             document.getElementById('url').value = app.url || '';
             document.getElementById('notes').value = app.notes || '';
             document.getElementById('resumeUrl').value = app.resumeUrl || '';
@@ -2110,6 +2577,36 @@
         document.getElementById('cancelBtn').addEventListener('click', closeModal);
         modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
         appForm.addEventListener('submit', async (e) => { e.preventDefault(); const data = Object.fromEntries(new FormData(appForm)); if (editingId) await updateApplication(editingId, data); else await addApplication(data); closeModal(); });
+
+        // ===== Auto-Save Notes (Debounced) =====
+        let notesAutoSaveTimeout = null;
+        const notesField = document.getElementById('notes');
+        const notesSaveIndicator = document.createElement('span');
+        notesSaveIndicator.style.cssText = 'font-size: var(--font-size-xs); color: var(--color-text-tertiary); margin-left: var(--space-2); opacity: 0; transition: opacity 0.2s;';
+        notesField.parentElement.querySelector('label').appendChild(notesSaveIndicator);
+
+        notesField.addEventListener('input', () => {
+            if (!editingId) return; // Only auto-save when editing existing
+
+            clearTimeout(notesAutoSaveTimeout);
+            notesSaveIndicator.textContent = '(typing...)';
+            notesSaveIndicator.style.opacity = '1';
+
+            notesAutoSaveTimeout = setTimeout(async () => {
+                const data = Object.fromEntries(new FormData(appForm));
+                await updateApplication(editingId, data);
+                notesSaveIndicator.textContent = '✓ saved';
+                setTimeout(() => { notesSaveIndicator.style.opacity = '0'; }, 1500);
+            }, 1000); // Save after 1 second of no typing
+        });
+
+        // ===== Search Input (Debounced) =====
+        let searchTimeout = null;
+        document.getElementById('searchInput').addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(render, 200);
+        });
+
         filterStatus.addEventListener('change', render);
         sortBy.addEventListener('change', render);
         toastUndo.addEventListener('click', undoDelete);
@@ -2248,6 +2745,65 @@
             render();
         }
         window.removeInterview = removeInterview;
+
+        // ===== PWA Service Worker & Install Prompt =====
+        let deferredInstallPrompt = null;
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', async () => {
+                try {
+                    const registration = await navigator.serviceWorker.register('/sw.js');
+                    console.log('[PWA] Service Worker registered:', registration.scope);
+                } catch (err) {
+                    console.log('[PWA] Service Worker registration failed:', err);
+                }
+            });
+        }
+
+        // Capture install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            showInstallBanner();
+        });
+
+        function showInstallBanner() {
+            const existing = document.getElementById('pwaInstallBanner');
+            if (existing) return;
+
+            const banner = document.createElement('div');
+            banner.id = 'pwaInstallBanner';
+            banner.innerHTML = `
+                <div style="position: fixed; bottom: 20px; left: 20px; right: 20px; max-width: 400px; margin: 0 auto; padding: var(--space-4); background: linear-gradient(135deg, hsl(var(--hue-primary), 91%, 60%), hsl(var(--hue-primary), 91%, 45%)); color: white; border-radius: var(--radius-md); box-shadow: var(--shadow-xl); z-index: 9999; display: flex; align-items: center; gap: var(--space-3);">
+                    <span style="font-size: 2rem;">📋</span>
+                    <div style="flex: 1;">
+                        <strong>Install JobTracker</strong>
+                        <p style="margin: 0; font-size: var(--font-size-sm); opacity: 0.9;">Add to home screen for offline access</p>
+                    </div>
+                    <button onclick="installPWA()" style="padding: 8px 16px; background: white; color: hsl(var(--hue-primary), 91%, 45%); border: none; border-radius: var(--radius-sm); font-weight: 600; cursor: pointer;">Install</button>
+                    <button onclick="dismissInstallBanner()" style="padding: 8px; background: transparent; border: none; color: white; cursor: pointer; font-size: 1.2rem;">✕</button>
+                </div>
+            `;
+            document.body.appendChild(banner);
+        }
+
+        async function installPWA() {
+            if (!deferredInstallPrompt) return;
+            deferredInstallPrompt.prompt();
+            const { outcome } = await deferredInstallPrompt.userChoice;
+            console.log('[PWA] Install outcome:', outcome);
+            deferredInstallPrompt = null;
+            dismissInstallBanner();
+        }
+
+        function dismissInstallBanner() {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner) banner.remove();
+        }
+
+        window.installPWA = installPWA;
+        window.dismissInstallBanner = dismissInstallBanner;
     </script>
 </body>
 
